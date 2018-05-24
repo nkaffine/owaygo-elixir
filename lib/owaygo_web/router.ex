@@ -11,5 +11,6 @@ defmodule OwaygoWeb.Router do
     resources "/user", UserController, only: [:create, :update]
     resources "/user/email", EmailUpdateController, only: [:update]
     resources "/user/birthday", BirthdayUpdateController, only: [:update]
+    resources "/user/discoverer/apply", DiscovererApplicationController, only: [:create]
   end
 end
