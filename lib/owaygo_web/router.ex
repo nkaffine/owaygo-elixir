@@ -12,4 +12,9 @@ defmodule OwaygoWeb.Router do
     resources "/user/email", EmailUpdateController, only: [:update]
     resources "/user/birthday", BirthdayUpdateController, only: [:update]
   end
+
+  scope "/api/v1/admin", OwaygoWeb do
+    pipe_through :api
+    
+  end
 end

@@ -221,4 +221,36 @@ defmodule Owaygo.User.UpdateUserInfoTest do
     attrs = %{lname: String.duplicate("a", 212)}
     test_success(@valid_create, attrs)
   end
+
+  defp test_fname_rejects(fname) do
+    test_failure(@valid_create, %{fname: fname}, %{fname: ["names can only contain alphabetic characters"]})
+  end
+
+  test "reject when fname has numeric chars" do
+    test_fname_rejects("124asnSDGfkasncnas")
+  end
+
+  test "reject when fname has punctuation" do
+    test_fname_rejects("kaAGsfj!afk?kasfk.")
+  end
+
+  test "reject when fname has miscelanious characters" do
+    test_fname_rejects("asdADSGksdfk@#-$%^&*~~=+)()(*@`)`/'\;:[{}]'")
+  end
+
+  defp test_lname_rejects(lname) do
+    test_failure(@valid_create, %{lname: lname}, %{lname: ["names can only contain alphabetic characters"]})
+  end
+
+  test "reject when lname has numeric chars" do
+    test_lname_rejects("124asnfJSDGkasncnas")
+  end
+
+  test "reject when lname has punctuation" do
+    test_lname_rejects("kasfj!afSDgk?kasfk.")
+  end
+
+  test "reject when lname has miscelanious characters" do
+    test_lname_rejects("asdfkSDGsdfk@#-$%^&*~~=+)()(*@`)`/'\;:[{}]'")
+  end
 end

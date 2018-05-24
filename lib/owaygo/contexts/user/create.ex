@@ -31,6 +31,8 @@ defmodule Owaygo.User.Create do
     |> validate_lat_lng
     |> Ecto.Changeset.validate_length(:fname, max: 255, message: "invalid length")
     |> Ecto.Changeset.validate_length(:lname, max: 255, message: "invalid length")
+    |> Ecto.Changeset.validate_format(:fname, ~r/^[a-z]*$/i, message: "names can only contain alphabetic characters")
+    |> Ecto.Changeset.validate_format(:lname, ~r/^[a-z]*$/i, message: "names can only contain alphabetic characters")
     |> Ecto.Changeset.validate_number(:recent_lat, less_than_or_equal_to: 90,
     greater_than_or_equal_to: -90, message: "invalid latitude")
     |> Ecto.Changeset.validate_number(:recent_lng, less_than_or_equal_to: 180,
@@ -52,8 +54,10 @@ defmodule Owaygo.User.Create do
     |> Ecto.Changeset.validate_length(:email, min: 5, max: 255, message: "invalid length")
     |> Ecto.Changeset.validate_length(:fname, max: 255, message: "invalid length")
     |> Ecto.Changeset.validate_length(:lname, max: 255, message: "invalid length")
+    |> Ecto.Changeset.validate_format(:fname, ~r/^[a-z]*$/i, message: "names can only contain alphabetic characters")
+    |> Ecto.Changeset.validate_format(:lname, ~r/^[a-z]*$/i, message: "names can only contain alphabetic characters")
     |> Ecto.Changeset.validate_format(:email, ~r/@/, message: "invalid email")
-    |> Ecto.Changeset.validate_format(:username, ~r/^[a-z]/i, message: "username must contain alphabetic characters")
+    |> Ecto.Changeset.validate_format(:username, ~r/^[a-z.0-9]*[a-z][a-z.0-9]*$/i, message: "username must contain alphabetic characters")
     |> validate_birthday
     |> Ecto.Changeset.validate_number(:recent_lat, less_than_or_equal_to: 90,
     greater_than_or_equal_to: -90, message: "invalid latitude")
