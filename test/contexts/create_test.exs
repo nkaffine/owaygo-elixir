@@ -91,6 +91,12 @@ defmodule Owaygo.Users.CreateTest do
     no_users_or_emails()
   end
 
+  test "accept username when there is one alphabetic character at the end" do
+    attrs = @valid_create |> Map.put(:username, String.duplicate("1", 23) <> "a")
+    assert {:ok, user} = Create.call(%{params: attrs})
+    assert user.username == String.duplicate("1", 23) <> "a"
+  end
+
   # Test when there are missing each parameter
   test "rejects when missing a username" do
     attrs = @valid_partial_create |> Map.delete(:username)
@@ -398,4 +404,41 @@ defmodule Owaygo.Users.CreateTest do
     assert {:ok, user} = Create.call(%{params: @valid_create |> Map.put(:recent_lat, -90)})
     assert user.recent_lat == -90
   end
+
+  defp test_fname_rejects(fname) do
+    assert {:error, changeset} = Create.call(%{params: @valid_create |> Map.put(:fname, fname)})
+    refute changeset.valid?
+    assert %{fname: ["names can only contain alphabetic characters"]} == errors_on(changeset)
+  end
+
+  test "reject when fname has numeric chars" do
+    test_fname_rejects("124asnSDGfkasncnas")
+  end
+
+  test "reject when fname has punctuation" do
+    test_fname_rejects("kaAGsfj!afk?kasfk.")
+  end
+
+  test "reject when fname has miscelanious characters" do
+    test_fname_rejects("asdADSGksdfk@#-$%^&*~~=+)()(*@`)`/'\;:[{}]'")
+  end
+
+  defp test_lname_rejects(lname) do
+    assert {:error, changeset} = Create.call(%{params: @valid_create |> Map.put(:lname, lname)})
+    refute changeset.valid?
+    assert %{lname: ["names can only contain alphabetic characters"]} == errors_on(changeset)
+  end
+
+  test "reject when lname has numeric chars" do
+    test_lname_rejects("124asnfJSDGkasncnas")
+  end
+
+  test "reject when lname has punctuation" do
+    test_lname_rejects("kasfj!afSDgk?kasfk.")
+  end
+
+  test "reject when lname has miscelanious characters" do
+    test_lname_rejects("asdfkSDGsdfk@#-$%^&*~~=+)()(*@`)`/'\;:[{}]'")
+  end
+
 end
