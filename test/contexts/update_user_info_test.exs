@@ -20,10 +20,10 @@ defmodule Owaygo.User.UpdateUserInfoTest do
   @lat 79.124125
   @lng 101.12451124
 
-  defp create_user() do
-    {:ok, user} = Create.call(%{params: @valid_create})
-    user.id
-  end
+  # defp create_user() do
+  #   {:ok, user} = Create.call(%{params: @valid_create})
+  #   user.id
+  # end
 
   defp create_user(create_statement) do
     {:ok, user} = Create.call(%{params: create_statement})

@@ -108,4 +108,31 @@ defmodule Owaygo.User.DiscovererApplicationTest do
     assert discoverer_application.date|> to_string == Date.utc_today |> to_string
     assert discoverer_application.message == "The email associated with your account must be verified before your application can be approved"
   end
+
+  # testing the show
+
+  test "accpet and return a valid repsonse with valid input for show" do
+    user_id = create_user()
+    attrs = %{user_id: user_id, reason: @reason}
+    assert {:ok, discoverer_application} = DiscovererApplication.call(%{params: attrs})
+    id = discoverer_application.id
+    assert {:ok, discoverer_application} = DiscovererApplication.show(%{params: %{id: id}})
+    assert discoverer_application.id == id
+    assert discoverer_application.user_id == user_id
+    assert discoverer_application.reason == @reason
+    assert discoverer_application.status == "pending"
+    assert discoverer_application.date |> to_string == Date.utc_today() |> to_string
+    assert discoverer_application.message == "The email associated with your account must be verified before your application can be approved"
+  end
+
+  test "reject when the user id is not provided for show" do
+    assert {:error, error} = DiscovererApplication.show(%{params: %{}})
+    assert error == %{id: ["can't be blank"]}
+  end
+
+
+  test "reject when the user does not exist for show" do
+    assert {:error, error} = DiscovererApplication.show(%{params: %{id: 1234}})
+    assert error == %{id: ["application does not exist"]}
+  end
 end

@@ -1,45 +1,63 @@
 defmodule Owaygo.User.DiscovererApplication do
-    import Ecto.Query
+  import Ecto.Query
 
-    alias Owaygo.DiscovererApplication
-    alias Owaygo.Repo
+  alias Owaygo.DiscovererApplication
+  alias Owaygo.Repo
 
-    @params [:user_id, :reason, :message]
-    @required_params [:user_id, :reason]
+  @params [:user_id, :reason, :message]
+  @required_params [:user_id, :reason]
 
-    def call(%{params: params}) do
-      case Repo.transaction fn ->
-        params
-        |> add_message
-        |> build_changeset
-        |> insert_application
-      end do
-        {:ok, value} -> value
-        {:error, value} -> value
+  def call(%{params: params}) do
+    case Repo.transaction fn ->
+      params
+      |> add_message
+      |> build_changeset
+      |> insert_application
+    end do
+      {:ok, value} -> value
+      {:error, value} -> value
+    end
+  end
+
+  def show(%{params: params}) do
+    if(params |> Map.has_key?(:id)) do
+      application = Repo.get(DiscovererApplication, params.id)
+      if(application != nil) do
+        message = %{user_id: application.user_id} |> add_message
+        if(message |> Map.has_key?(:message)) do
+          {:ok, application |> Map.put(:message, message.message)}
+        else
+          {:ok, application}
+        end
+      else
+        {:error, %{id: ["application does not exist"]}}
       end
+    else
+      {:error, %{id: ["can't be blank"]}}
     end
+  end
 
-    defp build_changeset(params) do
-      %DiscovererApplication{}
-      |> Ecto.Changeset.cast(params, @params)
-      |> Ecto.Changeset.validate_required(@required_params)
-      |> verify_user_exisistence
-      |> Ecto.Changeset.validate_length(:reason, min: 10, max: 255, message: "invalid length")
-      |> Ecto.Changeset.foreign_key_constraint(:user_id)
-    end
+  defp build_changeset(params) do
+    %DiscovererApplication{}
+    |> Ecto.Changeset.cast(params, @params)
+    |> Ecto.Changeset.validate_required(@required_params)
+    |> verify_user_exisistence
+    |> Ecto.Changeset.validate_length(:reason, min: 10, max: 255, message: "invalid length")
+    |> Ecto.Changeset.foreign_key_constraint(:user_id)
+  end
 
-    defp insert_application(changeset) do
-      Repo.insert(changeset)
-    end
+  defp insert_application(changeset) do
+    Repo.insert(changeset)
+  end
 
-    defp verify_user_exisistence(changeset) do
-      case changeset |> Ecto.Changeset.fetch_change(:id) do
-        {:ok, id} ->
-          if(Repo.one!(from u in "user", where: u.id == ^id, select: count(u.id)) == 1) do
-            changeset
-          else
-            changeset |> Ecto.Changeset.add_error(:id, "does not exist")
-          end
+  defp verify_user_exisistence(changeset) do
+    case changeset |> Ecto.Changeset.fetch_change(:id) do
+      {:ok, id} ->
+        if(Repo.one!(from u in "user", where: u.id == ^id, select: count(u.id)) == 1) do
+          changeset
+        else
+          changeset |> Ecto.Changeset.add_error(:id, "does not exist")
+        end
         _ -> changeset
       end
     end
@@ -62,4 +80,4 @@ defmodule Owaygo.User.DiscovererApplication do
         params
       end
     end
-end
+  end

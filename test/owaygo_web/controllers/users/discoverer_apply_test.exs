@@ -43,8 +43,24 @@ defmodule OwaygoWeb.Users.DiscovererApplyTest do
   test "valid parameters return a valid response for show" do
     conn = build_conn() |> post("/api/v1/user", @valid_create)
     body = conn |> response(201) |> Poison.decode!
+    user_id = body["id"]
+    attrs = %{id: user_id, reason: @valid_reason}
+    conn = build_conn() |> post("/api/v1/user/discoverer/apply", attrs)
+    body = conn |> response(201) |> Poison.decode!
     id = body["id"]
-    attrs = %{id: id, reason: @valid_reason}
+    conn = build_conn() |> get(discoverer_application_path(build_conn(), :show, id))
+    body = conn |> response(201) |> Poison.decode!
+    assert body["id"] == id
+    assert body["user_id"] == user_id
+    assert body["reason"] == @valid_reason
+    assert body["date"] == Date.utc_today |> to_string
+    assert body["status"] == "pending"
+  end
+
+  test "invalid parameters return an invalid repsonse for show" do
+    conn = build_conn() |> get(discoverer_application_path(build_conn(), :show, 123))
+    body = conn |> response(400) |> Poison.decode!
+    assert body["id"] == ["application does not exist"]
   end
 
 end
