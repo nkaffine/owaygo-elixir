@@ -1,4 +1,4 @@
-defmodule Owaygo.AdminDiscovererController do
+defmodule OwaygoWeb.AdminDiscovererController do
   use OwaygoWeb, :controller
 
   alias Owaygo.Admin.CreateDiscoverer
