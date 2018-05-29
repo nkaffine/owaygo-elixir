@@ -16,6 +16,6 @@ defmodule OwaygoWeb.Router do
 
   scope "/api/v1/admin", OwaygoWeb do
     pipe_through :api
-    
+    resources "/discoverer", AdminDiscovererController, only: [:create]
   end
 end
