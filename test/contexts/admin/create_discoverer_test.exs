@@ -23,7 +23,7 @@ defmodule Owaygo.Admin.DiscovererCreateTest do
   # Creates an application for the user with the given id and returns the
   # application id
   defp apply(id) do
-    attrs = %{user_id: id, reason: @valid_reason} |> IO.inspect
+    attrs = %{user_id: id, reason: @valid_reason}
     {:ok, application} = DiscovererApplication.call(%{params: attrs})
     application.id
   end
@@ -46,7 +46,7 @@ defmodule Owaygo.Admin.DiscovererCreateTest do
     assert {:ok, discoverer} = CreateDiscoverer.call(%{params: attrs})
     assert discoverer.id == user_id
     assert discoverer.balance == 0
-    assert discoverer.discoverer_since == Date.utc_today |> to_string
+    assert discoverer.discoverer_since |> to_string == Date.utc_today |> to_string
     params = %{id: app_id}
     assert {:ok, application} = DiscovererApplication.show(%{params: params})
     assert application.id == app_id
@@ -81,7 +81,7 @@ defmodule Owaygo.Admin.DiscovererCreateTest do
     assert {:ok, discoverer} = CreateDiscoverer.call(%{params: attrs})
     assert discoverer.id == user_id
     assert discoverer.balance == 0
-    assert discoverer.discoverer_since == Date.utc_today |> to_string
+    assert discoverer.discoverer_since |> to_string == Date.utc_today |> to_string
   end
 
   test "reject when user does not exist" do
@@ -97,7 +97,7 @@ defmodule Owaygo.Admin.DiscovererCreateTest do
     assert {:ok, discoverer} = CreateDiscoverer.call(%{params: attrs})
     assert discoverer.id == user_id
     assert discoverer.balance == 0
-    assert discoverer.discoverer_since == Date.utc_today |> to_string
+    assert discoverer.discoverer_since |> to_string == Date.utc_today |> to_string
     assert {:error, changeset} = CreateDiscoverer.call(%{params: attrs})
     assert %{id: ["user is already discoverer"]} == errors_on(changeset)
   end
@@ -109,7 +109,7 @@ defmodule Owaygo.Admin.DiscovererCreateTest do
     assert {:ok, discoverer} = CreateDiscoverer.call(%{params: attrs})
     assert discoverer.id == user_id
     assert discoverer.balance == 0
-    assert discoverer.discoverer_since == Date.utc_today |> to_string
+    assert discoverer.discoverer_since |> to_string == Date.utc_today |> to_string
   end
 
   test "ignores discoverer since value if someone were to pass it" do
@@ -119,7 +119,7 @@ defmodule Owaygo.Admin.DiscovererCreateTest do
     assert {:ok, discoverer} = CreateDiscoverer.call(%{params: attrs})
     assert discoverer.id == user_id
     assert discoverer.balance == 0
-    assert discoverer.discoverer_since == Date.utc_today |> to_string
+    assert discoverer.discoverer_since |> to_string == Date.utc_today |> to_string
   end
 
   test "reject when user_id is not provided" do
