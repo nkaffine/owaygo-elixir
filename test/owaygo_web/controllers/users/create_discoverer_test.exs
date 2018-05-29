@@ -31,9 +31,20 @@ defmodule Owaygo.Discoverers.CreateTest do
     body
   end
 
+  # validates the given email for the user with the given user_id
+  defp validate_email(id, email) do
+    attrs =  %{email: email}
+    conn = build_conn() |> put(test_verify_email_path(build_conn(), :update, id), attrs)
+    body = conn |> response(201) |> Poison.decode!
+    assert body["id"] == id
+    assert body["email"] == email
+    assert body["date"] == Date.utc_today |> to_string
+  end
+
   test "provided valid parameters, accepts input and produces valid response" do
     id = create_user()
     app_id = apply_discoverer(id)
+    validate_email(id, @valid_email)
     attrs = %{id: id}
     conn = build_conn() |> post("/api/v1/admin/discoverer", attrs)
     body = conn |> response(201) |> Poison.decode!
