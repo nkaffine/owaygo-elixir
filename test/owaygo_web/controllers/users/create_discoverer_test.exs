@@ -1,4 +1,4 @@
-defmodule Owaygo.Discoverers.CreateTest do
+defmodule OwaygoWeb.Discoverers.CreateTest do
   use OwaygoWeb.ConnCase
 
   @valid_username "nkaffine"
