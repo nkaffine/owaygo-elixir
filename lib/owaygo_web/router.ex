@@ -20,7 +20,7 @@ defmodule OwaygoWeb.Router do
   end
 
   scope "/api/v1/test", OwaygoWeb do
-    pip_through :api
+    pipe_through :api
     resources "/verify_email", TestVerifyEmailController, only: [:update]
   end
 end
