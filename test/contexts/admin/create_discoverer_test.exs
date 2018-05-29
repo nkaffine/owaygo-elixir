@@ -59,7 +59,7 @@ defmodule Owaygo.Admin.DiscovererCreateTest do
     app_id = apply(user_id)
     attrs = %{id: user_id}
     assert {:error, changeset} = CreateDiscoverer.call(%{params: attrs})
-    assert %{id: ["user has not verified email"]} == errors_on(changeset)
+    assert %{id: ["user has not verified their email"]} == errors_on(changeset)
     params = %{id: app_id}
     assert {:ok, application} = DiscovererApplication.show(%{params: params})
     assert application.id == app_id
@@ -71,7 +71,7 @@ defmodule Owaygo.Admin.DiscovererCreateTest do
     user_id = create_user()
     attrs = %{id: user_id}
     assert {:error, changeset} = CreateDiscoverer.call(%{params: attrs})
-    assert %{id: ["user has not verified email"]} == errors_on(changeset)
+    assert %{id: ["user has not verified their email"]} == errors_on(changeset)
   end
 
   test "accept when the discoverer has verified their email and not applied" do
@@ -99,7 +99,7 @@ defmodule Owaygo.Admin.DiscovererCreateTest do
     assert discoverer.balance == 0
     assert discoverer.discoverer_since |> to_string == Date.utc_today |> to_string
     assert {:error, changeset} = CreateDiscoverer.call(%{params: attrs})
-    assert %{id: ["user is already discoverer"]} == errors_on(changeset)
+    assert %{id: ["user is already a discoverer"]} == errors_on(changeset)
   end
 
   test "ignores balance if someone were to pass a balance" do

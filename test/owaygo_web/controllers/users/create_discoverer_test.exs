@@ -51,7 +51,7 @@ defmodule Owaygo.Discoverers.CreateTest do
     assert body["id"] |> is_integer
     assert body["id"] == id
     assert body["discoverer_since"] == Date.utc_today |> to_string
-    assert body["balance"] === 0
+    assert body["balance"] === 0.0
     body = get_application(app_id)
     assert body["id"] == app_id
     assert body["user_id"] == id

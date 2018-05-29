@@ -12,7 +12,8 @@ defmodule OwaygoWeb.AdminDiscovererController do
   end
 
   defp render_discoverer(conn, discoverer) do
-    {:ok, body} = discoverer |> Poison.encode!
+    {:ok, body} = %{id: discoverer.id, balance: discoverer.balance,
+    discoverer_since: discoverer.discoverer_since} |> Poison.encode
     conn |> resp(201, body)
   end
 
