@@ -18,4 +18,9 @@ defmodule OwaygoWeb.Router do
     pipe_through :api
     resources "/discoverer", AdminDiscovererController, only: [:create]
   end
+
+  scope "/api/v1/test", OwaygoWeb do
+    pip_through :api
+    resources "/verify_email", TestVerifyEmailController, only: [:update]
+  end
 end
