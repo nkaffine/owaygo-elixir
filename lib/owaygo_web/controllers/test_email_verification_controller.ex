@@ -3,8 +3,8 @@ defmodule OwaygoWeb.TestVerifyEmailController do
 
   alias Owaygo.Test.VerifyEmail
 
-  def update(conn, %{"id" => id}) do
-    attrs = %{id: id}
+  def update(conn, %{"id" => id, "email" => email}) do
+    attrs = %{id: id, email: email}
     case VerifyEmail.call(%{params: attrs}) do
       {:ok, email_verification} -> render_email_verification(conn, email_verification)
       {:error, changeset} -> render_error(conn, changeset)
@@ -13,7 +13,8 @@ defmodule OwaygoWeb.TestVerifyEmailController do
 
   defp render_email_verification(conn, email_verification) do
     {:ok, body} = %{id: email_verification.id,
-    email: email_verification.email, date: email_verification.date}
+    email: email_verification.email, verification_date: email_verification.verification_date}
+    |> Poison.encode
     conn |> resp(201, body)
   end
 

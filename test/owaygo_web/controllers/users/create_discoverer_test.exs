@@ -38,7 +38,7 @@ defmodule Owaygo.Discoverers.CreateTest do
     body = conn |> response(201) |> Poison.decode!
     assert body["id"] == id
     assert body["email"] == email
-    assert body["date"] == Date.utc_today |> to_string
+    assert body["verification_date"] == Date.utc_today |> to_string
   end
 
   test "provided valid parameters, accepts input and produces valid response" do
