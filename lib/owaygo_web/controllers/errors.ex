@@ -1,6 +1,6 @@
 defmodule OwaygoWeb.Errors do
   use OwaygoWeb, :controller
-  
+
   def render_error(conn, changeset) do
     errors = Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
       Enum.reduce(opts, msg, fn {key, value}, acc ->
