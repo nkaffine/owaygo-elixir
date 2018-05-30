@@ -2,6 +2,8 @@ defmodule OwaygoWeb.UserController do
   use OwaygoWeb, :controller
 
   alias Owaygo.User.Create
+  alias Owaygo.User.Show
+  alias OwaygoWeb.Errors
 
   def create(conn, params) do
     attrs = %{username: params["username"], fname: params["fname"], lname: params["lname"],
@@ -9,7 +11,7 @@ defmodule OwaygoWeb.UserController do
     recent_lat: params["recent_lat"], recent_lng: params["recent_lng"]}
     case Create.call(%{params: attrs}) do
       {:ok, user} -> render_user(conn, user)
-      {:error, changeset} -> render_error(conn, changeset)
+      {:error, changeset} -> Errors.render_error(conn, changeset)
     end
   end
 
@@ -18,6 +20,14 @@ defmodule OwaygoWeb.UserController do
     gender: params["gender"], recent_lat: params["recent_lat"],
     recent_lng: params["recent_lng"]}
     case Create.update(%{params: attrs}) do
+      {:ok, user} -> render_user(conn, user)
+      {:error, changeset} -> Errors.render_error(conn, changeset)
+    end
+  end
+
+  def show(conn, %{"id" => id}) do
+    attrs = %{id: id}
+    case Show.call(%{params: attrs}) do
       {:ok, user} -> render_user(conn, user)
       {:error, changeset} -> render_error(conn, changeset)
     end
@@ -32,11 +42,6 @@ defmodule OwaygoWeb.UserController do
   end
 
   defp render_error(conn, changeset) do
-    errors = Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
-      Enum.reduce(opts, msg, fn {key, value}, acc ->
-        String.replace(acc, "%{#{key}}", to_string(value))
-      end)
-    end)
-    resp(conn, 400, errors |> Poison.encode!)
+    resp(conn, 400, changeset |> Poison.encode!)
   end
 end
