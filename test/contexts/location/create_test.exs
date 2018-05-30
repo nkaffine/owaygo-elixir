@@ -2,7 +2,8 @@ defmodule Owaygo.Location.TestCreate do
   use Owaygo.DataCase
 
   alias Owaygo.Location.Create
-  alias Owaygo.User.Create
+  alias Owaygo.Test.VerifyEmail
+  alias Owaygo.User
 
   @username "nkaffine"
   @fname "Nick"
@@ -15,54 +16,143 @@ defmodule Owaygo.Location.TestCreate do
 
   #creates a user and returns the new user's id
   defp create_user() do
-    assert {:ok, user} = Create.call(%{params: @create})
+    assert {:ok, user} = User.Create.call(%{params: @create})
     user.id
   end
 
-  test "return location information when all information is passed"
+  defp create() do
+    id = create_user()
+    assert {:ok, _verification} = VerifyEmail.call(%{params: %{id: id, email: @email}})
+    %{lat: @lat, lng: @lng, name: @name, discoverer: id}
+  end
+
+  defp check_location(location, create) do
+    assert location.id > 0
+    assert location.name == create.name
+    assert location.lat == create.lat
+    assert location.lng == create.lng
+    assert location.discoverer == create.discoverer
+    assert location.owner == nil
+    assert location.claimer == nil
+    assert location.discovery_date |> to_string == Date.utc_today |> to_string
+    assert location.type == nil
+  end
+
+  defp check_success(create) do
+    assert {:ok, location} = Create.call(%{params: create})
+    check_location(location, create)
+  end
+
+  defp check_error(create, error) do
+    assert {:error, changeset} = Create.call(%{params: create})
+    assert error == errors_on(changeset)
+  end
+
+  test "return location information when all information is passed" do
+    assert {:ok, location} = Create.call(%{params: create()})
+    check_location(location, create())
+  end
 
   #test when there are missing parameters
-  test "throw error when no lat is passed"
+  test "throw error when no lat is passed" do
+    create = create() |> Map.delete(:lat)
+    assert {:error, changeset} = Create.call(%{params: create})
+    assert %{lat: ["can't be blank"]} == errors_on(changeset)
+  end
 
-  test "throw error when no lng is passed"
+  test "throw error when no lng is passed" do
+    create = create() |> Map.delete(:lng)
+    assert {:error, changeset} = Create.call(%{params: create})
+    assert %{lng: ["can't be blank"]} == errors_on(changeset)
+  end
 
-  test "throw error when no name is passed"
+  test "throw error when no name is passed" do
+    create = create() |> Map.delete(:name)
+    assert {:error, changeset} = Create.call(%{params: create})
+    assert %{name: ["can't be blank"]} == errors_on(changeset)
+  end
 
-  test "throw error when no discoverer is passed"
+  test "throw error when no discoverer is passed" do
+    create = create() |> Map.delete(:discoverer)
+    assert {:error, changeset} = Create.call(%{params: create})
+    assert %{discoverer: ["can't be blank"]} == errors_on(changeset)
+  end
 
   #test invalid inputs
 
   #test lat
-  test "throw error when lat is too small"
+  test "throw error when lat is too small" do
+    create = create() |> Map.put(:lat, -90.124)
+    check_error(create, %{lat: ["is invalid"]})
+  end
 
-  test "throw error when lat is too big"
+  test "throw error when lat is too big" do
+    create = create() |> Map.put(:lat, 90.124124)
+    check_error(create, %{lat: ["is invalid"]})
+  end
 
-  test "accept when lat is exactly -90"
+  test "accept when lat is exactly -90" do
+    create = create() |> Map.put(:lat, -90)
+    assert {:ok, location} = Create.call(%{params: create})
+    check_location(location, create)
+  end
 
-  test "accept when lat is exaclty 90"
+  test "accept when lat is exactly 90" do
+    create = create() |> Map.put(:lat, 90)
+    check_success(create)
+  end
 
   #test lng
-  test "throw error when lng is too small"
+  test "throw error when lng is too small" do
+    create = create() |> Map.put(:lng, -180.12512)
+    check_error(create, %{lng: ["is invalid"]})
+  end
 
-  test "throw error when lng is too large"
+  test "throw error when lng is too large" do
+    create = create() |> Map.put(:lng, 180.125135)
+    check_error(create, %{lng: ["is invalid"]})
+  end
 
-  test "accept when lng is exactly -180"
+  test "accept when lng is exactly -180" do
+    create = create() |> Map.put(:lng, -180)
+    check_success(create)
+  end
 
-  test "accept when lng is exactly 180"
+  test "accept when lng is exactly 180" do
+    create = create() |> Map.put(:lng, 180)
+    check_success(create)
+  end
 
   #test discoverer
-  test "reject when user does not exist"
+  test "reject when user does not exist" do
+    create = %{lat: @lat, lng: @lng, name: @name, discoverer: 123}
+    check_error(create, %{discoverer: ["does not exist"]})
+  end
 
   #these depend on whether discoverers are the only ones who can discover places
-  test "reject when user exists but they are not a discoverer"
+  test "reject when user exists but they are not a discoverer" do
+    user_id = create_user()
+    create = %{lat: @lat, lng: @lng, name: @name, id: user_id}
+    check_error(create, %{discoverer: ["user is not discoverer"]})
+  end
 
   #only let people who have verified their email discover things?
-  test "reject when user exists and is discoverer but has not verified their email"
+  test "reject when user exists and is discoverer but has not verified their email" do
+    user_id = create_user()
+    create = %{lat: @lat, lng: @lng, name: @name, id: user_id}
+    check_error(create, %{discoverer: ["email has not been verified"]})
+  end
 
   #test name
-  test "reject when location has a name longer than 255 characters"
+  test "reject when location has a name longer than 255 characters" do
+    create = create() |> Map.put(:name, String.duplicate("a", 256))
+    check_error(create, %{name: ["invalid length"]})
+  end
 
-  test "accept when location has exactly 255 characters"
+  test "accept when location has exactly 255 characters" do
+    create = create() |> Map.put(:name, String.duplicate("a", 255))
+    check_success(create)
+  end
 
   #should there be any other restrictions on the names of locations (min length,
   #only alphanumerica characters?(would have to include punctuation))
@@ -70,9 +160,15 @@ defmodule Owaygo.Location.TestCreate do
   #need to add test for passing in the type of location it is when being created
 
   #test ignoring invalid parameters
-  test "ingnores when an owner is passed in"
+  test "ingnores when an owner is passed in" do
+    create = create() |> Map.put(:owner, 123)
+    check_success(create)
+  end
 
-  test "ignores when a claimer is passed in"
+  test "ignores when a claimer is passed in" do
+    create = create() |> Map.put(:claimer, 123)
+    check_success(create)
+  end
 
 
 end
