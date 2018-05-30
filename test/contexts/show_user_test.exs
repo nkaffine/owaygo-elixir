@@ -35,8 +35,8 @@ defmodule Owaygo.User.ShowTest do
     assert user.email == create.email
     assert user.gender == create.gender
     assert user.birthday |> to_string == create.birthday
-    assert user.recent_lat == create.lat
-    assert user.recent_lng == create.lng
+    assert user.recent_lat == create.recent_lat
+    assert user.recent_lng == create.recent_lng
     assert user.fame == 0
     assert user.coin_balance == 0;
   end
