@@ -37,7 +37,7 @@ defmodule OwaygoWeb.User.ShowTest do
   end
 
   test "show error when passed invalid parameters" do
-    conn = build_conn() |> get(user_path(build_conn, :show, 123))
+    conn = build_conn() |> get(user_path(build_conn(), :show, 123))
     body = conn |> response(400) |> Poison.decode!
     assert ["user does not exist"] == body["id"]
   end

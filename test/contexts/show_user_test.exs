@@ -49,7 +49,7 @@ defmodule Owaygo.User.ShowTest do
 
   test "return correct user information when user_id is valid and there are 2 users" do
     user_id1 = create_user(@create)
-    user_id2 = create_user(@create2)
+    _user_id2 = create_user(@create2)
     assert {:ok, user} = Show.call(%{params: %{id: user_id1}})
     check_user(user, @create, user_id1)
   end
