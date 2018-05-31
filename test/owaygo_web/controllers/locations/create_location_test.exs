@@ -17,8 +17,18 @@ defmodule OwaygoWeb.Location.TestCreate do
     body["id"]
   end
 
+  defp verify_email(id) do
+    attrs =  %{email: @email}
+    conn = build_conn() |> put(test_verify_email_path(build_conn(), :update, id), attrs)
+    body = conn |> response(201) |> Poison.decode!
+    assert body["id"] == id
+    assert body["email"] == @email
+    assert body["verification_date"] == Date.utc_today |> to_string
+  end
+
   test "given valid parameters accepts and returns the location information" do
     id = create_user()
+    verify_email(id)
     attrs = %{lat: @lat, lng: @lng, name: @name, discoverer: id}
     conn = build_conn() |> post("/api/v1/location", attrs)
     body = conn |> response(201) |> Poison.decode!
@@ -39,6 +49,6 @@ defmodule OwaygoWeb.Location.TestCreate do
     attrs = %{lat: -177.124124152, lng: @lng, name: @name, discoverer: id}
     conn = build_conn() |> post("/api/v1/location", attrs)
     body = conn |> response(400) |> Poison.decode!
-    assert body["lat"] == ["is invalid"]
+    assert body["lat"] == ["must be greater than or equal to -90"]
   end
 end
