@@ -36,10 +36,9 @@ defmodule Owaygo.Location.TestCreate do
     assert location.lat == create.lat
     assert location.lng == create.lng
     assert location.discoverer == create.discoverer
-    assert location.owner == nil
     assert location.claimer == nil
     assert location.discovery_date |> to_string == Date.utc_today |> to_string
-    assert location.type == nil
+    #need to add owner and type once they are implemented
   end
 
   defp check_success(create) do
@@ -53,8 +52,7 @@ defmodule Owaygo.Location.TestCreate do
   end
 
   test "return location information when all information is passed" do
-    assert {:ok, location} = Create.call(%{params: create()})
-    check_location(location, create())
+    check_success(create())
   end
 
   #test when there are missing parameters
