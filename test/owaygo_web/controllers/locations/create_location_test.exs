@@ -29,7 +29,7 @@ defmodule OwaygoWeb.Location.TestCreate do
   test "given valid parameters accepts and returns the location information" do
     id = create_user()
     verify_email(id)
-    attrs = %{lat: @lat, lng: @lng, name: @name, discoverer: id}
+    attrs = %{lat: @lat, lng: @lng, name: @name, discoverer_id: id}
     conn = build_conn() |> post("/api/v1/location", attrs)
     body = conn |> response(201) |> Poison.decode!
     assert body["id"] |> is_integer
@@ -37,16 +37,15 @@ defmodule OwaygoWeb.Location.TestCreate do
     assert body["lat"] == @lat
     assert body["lng"] == @lng
     assert body["name"] == @name
-    assert body["discoverer"] == id
-    assert body["owner"] == nil
+    assert body["discoverer_id"] == id
     assert body["discovery_date"] == Date.utc_today |> to_string
-    assert body["location_type"] == nil
-    assert body["claimer"] == nil
+    assert body["claimer_id"] == nil
+    #need to add owner and type when they are implemented
   end
 
   test "given invalid paramters throws and error" do
     id = create_user()
-    attrs = %{lat: -177.124124152, lng: @lng, name: @name, discoverer: id}
+    attrs = %{lat: -177.124124152, lng: @lng, name: @name, discoverer_id: id}
     conn = build_conn() |> post("/api/v1/location", attrs)
     body = conn |> response(400) |> Poison.decode!
     assert body["lat"] == ["must be greater than or equal to -90"]

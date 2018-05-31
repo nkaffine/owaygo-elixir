@@ -27,7 +27,7 @@ defmodule Owaygo.Location.TestCreate do
   defp create() do
     id = create_user()
     verify_email(id)
-    %{lat: @lat, lng: @lng, name: @name, discoverer: id}
+    %{lat: @lat, lng: @lng, name: @name, discoverer_id: id}
   end
 
   defp check_location(location, create) do
@@ -35,8 +35,8 @@ defmodule Owaygo.Location.TestCreate do
     assert location.name == create.name
     assert location.lat == create.lat
     assert location.lng == create.lng
-    assert location.discoverer == create.discoverer
-    assert location.claimer == nil
+    assert location.discoverer_id == create.discoverer_id
+    assert location.claimer_id == nil
     assert location.discovery_date |> to_string == Date.utc_today |> to_string
     #need to add owner and type once they are implemented
   end
@@ -75,9 +75,9 @@ defmodule Owaygo.Location.TestCreate do
   end
 
   test "throw error when no discoverer is passed" do
-    create = create() |> Map.delete(:discoverer)
+    create = create() |> Map.delete(:discoverer_id)
     assert {:error, changeset} = Create.call(%{params: create})
-    assert %{discoverer: ["can't be blank"]} == errors_on(changeset)
+    assert %{discoverer_id: ["can't be blank"]} == errors_on(changeset)
   end
 
   #test invalid inputs
@@ -127,23 +127,23 @@ defmodule Owaygo.Location.TestCreate do
 
   #test discoverer
   test "reject when user does not exist" do
-    create = %{lat: @lat, lng: @lng, name: @name, discoverer: 123}
-    check_error(create, %{discoverer: ["user does not exist"]})
+    create = %{lat: @lat, lng: @lng, name: @name, discoverer_id: 123}
+    check_error(create, %{discoverer_id: ["user does not exist"]})
   end
 
   #these depend on whether discoverers are the only ones who can discover places
   test "accepts when the user exists but is not a discoverer" do
     user_id = create_user()
     verify_email(user_id)
-    create = %{lat: @lat, lng: @lng, name: @name, discoverer: user_id}
+    create = %{lat: @lat, lng: @lng, name: @name, discoverer_id: user_id}
     check_success(create)
   end
 
   #only let people who have verified their email discover things?
   test "reject when user exists but has not verified their email" do
     user_id = create_user()
-    create = %{lat: @lat, lng: @lng, name: @name, discoverer: user_id}
-    check_error(create, %{discoverer: ["email has not been verified"]})
+    create = %{lat: @lat, lng: @lng, name: @name, discoverer_id: user_id}
+    check_error(create, %{discoverer_id: ["email has not been verified"]})
   end
 
   #test name
@@ -169,7 +169,7 @@ defmodule Owaygo.Location.TestCreate do
   end
 
   test "ignores when a claimer is passed in" do
-    create = create() |> Map.put(:claimer, 123)
+    create = create() |> Map.put(:claimer_id, 123)
     check_success(create)
   end
 
