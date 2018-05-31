@@ -130,7 +130,7 @@ defmodule Owaygo.Location.TestCreate do
   end
 
   #these depend on whether discoverers are the only ones who can discover places
-  test "reject when user exists but they are not a discoverer" do
+  test "accepts when the user exists but is not a discoverer" do
     user_id = create_user()
     create = %{lat: @lat, lng: @lng, name: @name, id: user_id}
     check_error(create, %{discoverer: ["user is not discoverer"]})
