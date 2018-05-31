@@ -133,11 +133,11 @@ defmodule Owaygo.Location.TestCreate do
   test "accepts when the user exists but is not a discoverer" do
     user_id = create_user()
     create = %{lat: @lat, lng: @lng, name: @name, id: user_id}
-    check_error(create, %{discoverer: ["user is not discoverer"]})
+    check_success(create)
   end
 
   #only let people who have verified their email discover things?
-  test "reject when user exists and is discoverer but has not verified their email" do
+  test "reject when user exists but has not verified their email" do
     user_id = create_user()
     create = %{lat: @lat, lng: @lng, name: @name, id: user_id}
     check_error(create, %{discoverer: ["email has not been verified"]})
