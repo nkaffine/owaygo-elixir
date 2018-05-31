@@ -7,14 +7,14 @@ defmodule Owaygo.Repo.Migrations.AddLocationTable do
       add :lat, :float
       add :lng, :float
       add :discovery_date, :date
-      add :discoverer, references(:user)
-      add :claimer, references(:discoverer)
+      add :discoverer_id, references(:user)
+      add :claimer_id, references(:discoverer)
       #need to add the type and owner once both of those have been implemented
     end
     create index(:location, [:lat, :lng])
     create index(:location, :name)
-    create index(:location, :discoverer)
-    create index(:location, :claimer)
+    create index(:location, :discoverer_id)
+    create index(:location, :claimer_id)
   end
 
   def down do
