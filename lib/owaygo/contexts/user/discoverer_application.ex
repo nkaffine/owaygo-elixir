@@ -51,12 +51,12 @@ defmodule Owaygo.User.DiscovererApplication do
   end
 
   defp verify_user_exisistence(changeset) do
-    case changeset |> Ecto.Changeset.fetch_change(:id) do
+    case changeset |> Ecto.Changeset.fetch_change(:user_id) do
       {:ok, id} ->
         if(Repo.one!(from u in "user", where: u.id == ^id, select: count(u.id)) == 1) do
           changeset
         else
-          changeset |> Ecto.Changeset.add_error(:id, "does not exist")
+          changeset |> Ecto.Changeset.add_error(:user_id, "does not exist")
         end
         _ -> changeset
       end
