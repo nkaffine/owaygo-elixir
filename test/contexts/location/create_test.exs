@@ -20,9 +20,13 @@ defmodule Owaygo.Location.TestCreate do
     user.id
   end
 
+  defp verify_email(id) do
+    assert {:ok, _verification} = VerifyEmail.call(%{params: %{id: id, email: @email}})
+  end
+
   defp create() do
     id = create_user()
-    assert {:ok, _verification} = VerifyEmail.call(%{params: %{id: id, email: @email}})
+    verify_email(id)
     %{lat: @lat, lng: @lng, name: @name, discoverer: id}
   end
 
@@ -83,12 +87,12 @@ defmodule Owaygo.Location.TestCreate do
   #test lat
   test "throw error when lat is too small" do
     create = create() |> Map.put(:lat, -90.124)
-    check_error(create, %{lat: ["is invalid"]})
+    check_error(create, %{lat: ["must be greater than or equal to -90"]})
   end
 
   test "throw error when lat is too big" do
     create = create() |> Map.put(:lat, 90.124124)
-    check_error(create, %{lat: ["is invalid"]})
+    check_error(create, %{lat: ["must be less than or equal to 90"]})
   end
 
   test "accept when lat is exactly -90" do
@@ -105,12 +109,12 @@ defmodule Owaygo.Location.TestCreate do
   #test lng
   test "throw error when lng is too small" do
     create = create() |> Map.put(:lng, -180.12512)
-    check_error(create, %{lng: ["is invalid"]})
+    check_error(create, %{lng: ["must be greater than or equal to -180"]})
   end
 
   test "throw error when lng is too large" do
     create = create() |> Map.put(:lng, 180.125135)
-    check_error(create, %{lng: ["is invalid"]})
+    check_error(create, %{lng: ["must be less than or equal to 180"]})
   end
 
   test "accept when lng is exactly -180" do
@@ -126,20 +130,21 @@ defmodule Owaygo.Location.TestCreate do
   #test discoverer
   test "reject when user does not exist" do
     create = %{lat: @lat, lng: @lng, name: @name, discoverer: 123}
-    check_error(create, %{discoverer: ["does not exist"]})
+    check_error(create, %{discoverer: ["user does not exist"]})
   end
 
   #these depend on whether discoverers are the only ones who can discover places
   test "accepts when the user exists but is not a discoverer" do
     user_id = create_user()
-    create = %{lat: @lat, lng: @lng, name: @name, id: user_id}
+    verify_email(user_id)
+    create = %{lat: @lat, lng: @lng, name: @name, discoverer: user_id}
     check_success(create)
   end
 
   #only let people who have verified their email discover things?
   test "reject when user exists but has not verified their email" do
     user_id = create_user()
-    create = %{lat: @lat, lng: @lng, name: @name, id: user_id}
+    create = %{lat: @lat, lng: @lng, name: @name, discoverer: user_id}
     check_error(create, %{discoverer: ["email has not been verified"]})
   end
 
