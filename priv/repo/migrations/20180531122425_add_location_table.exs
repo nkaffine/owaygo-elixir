@@ -8,7 +8,7 @@ defmodule Owaygo.Repo.Migrations.AddLocationTable do
       add :lng, :float
       add :discovery_date, :date
       add :discoverer_id, references(:user)
-      add :claimer_id, references(:discoverer)
+      add :claimer_id, references(:user)
       #need to add the type and owner once both of those have been implemented
     end
     create index(:location, [:lat, :lng])
