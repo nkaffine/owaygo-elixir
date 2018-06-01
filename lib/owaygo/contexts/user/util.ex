@@ -28,4 +28,12 @@ defmodule Owaygo.User.Util do
     and not is_nil(e.verification_date), select: count(e.id)) == 1
   end
 
+
+  def verified_email?(user_id) do
+    if(exists?(user_id)) do
+      verified_email?(user_id, get_email(user_id))
+    else
+      false
+    end
+  end
 end

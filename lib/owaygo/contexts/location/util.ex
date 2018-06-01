@@ -19,4 +19,13 @@ defmodule Owaygo.Location.Util do
     and l.claimer_id == ^claimer_id, select: count(l.id)) == 1
   end
 
+  @doc """
+  Checks if the location with the given location_id
+  """
+  def has_claimer?(location_id) do
+    Repo.one!(from l in Location,
+    where: l.id == ^location_id and not is_nil(l.claimer_id),
+    select: count(l.id)) == 1
+  end
+
 end
