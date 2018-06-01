@@ -3,9 +3,13 @@ defmodule Owaygo.User.OwnershipClaim do
   alias Ecto.Changeset
   alias Owaygo.Repo
   alias Owaygo.OwnershipClaim
+  alias Owaygo.Owner
+  alias Owaygo.User
+  alias Owaygo.Location
+  alias Location.Util
 
   @params [:user_id, :location_id]
-  @required_params [:user_id, :locaton_id]
+  @required_params [:user_id, :location_id]
 
   def call(%{params: params}) do
     case Repo.transaction fn ->
@@ -13,6 +17,8 @@ defmodule Owaygo.User.OwnershipClaim do
       |> build_changeset
       |> check_user_exists
       |> check_location_exists
+      |> email_verified?
+      |> has_owner?
       |> insert_claim
     end do
       {:ok, value} -> value
@@ -44,7 +50,8 @@ defmodule Owaygo.User.OwnershipClaim do
   defp check_location_exists(changeset) do
     if(changeset.valid?) do
       if(Repo.one!(from l in Location,
-      where: l.id == ^(changeset |> Changeset.get_change(:location_id))) == 1) do
+      where: l.id == ^(changeset |> Changeset.get_change(:location_id)),
+      select: count(l.id)) == 1) do
         changeset
       else
         changeset |> Changeset.add_error(:location_id, "location does not exist")
@@ -55,29 +62,55 @@ defmodule Owaygo.User.OwnershipClaim do
 
   end
 
+  defp email_verified?(changeset) do
+    if(changeset.valid?) do
+      user_id = changeset |> Changeset.get_change(:user_id)
+      if(User.Util.verified_email?(user_id)) do
+        changeset
+      else
+        changeset |> Changeset.add_error(:user_id, "user has not verified their email")
+      end
+    else
+      changeset
+    end
+  end
+
+  defp has_owner?(changeset) do
+    if(changeset.valid?) do
+      location_id = changeset |> Changeset.get_change(:location_id)
+      if(Owner.Util.has_owner?(location_id)) do
+        changeset |> Changeset.add_error(:location_id, "location already has owner")
+      else
+        changeset
+      end
+    else
+      changeset
+    end
+  end
+
   defp insert_claim(changeset) do
     if(changeset.valid?) do
-      if(location_has_claimer(changeset)) do
+      if(Location.Util.has_claimer?(changeset |> Changeset.get_change(:location_id))) do
         Repo.insert(changeset |> Changeset.put_change(:status, "pending"))
       else
         case Repo.get(Location, changeset |> Changeset.get_change(:location_id))
         |> Changeset.cast(%{claimer_id: changeset
         |> Changeset.get_change(:user_id)}, [:claimer_id])
-        |> Changeset.required_params([:claimer_id])
+        |> Changeset.validate_required([:claimer_id])
         |> Repo.update do
-          {:ok, value} -> Repo.insert(changeset |> Changeset.put_change(:status, "approved"))
+          {:ok, value} ->
+            user_id = changeset |> Changeset.get_change(:user_id)
+            location_id = changeset |> Changeset.get_change(:location_id)
+            case Owner.Util.make_owner(user_id, location_id) do
+              {:ok, value} -> Repo.insert(changeset |> Changeset.put_change(:status, "approved"))
+              {:error, value} -> {:error, value}
+            end
           {:error, value} -> {:error, value}
         end
       end
     else
       Repo.insert(changeset)
     end
-  end
-
-  defp location_has_claimer(changeset) do
-    Repo.one!(from l in Location,
-    where: l.id == ^(changeset |> Changeset.get_change(:location_id)),
-    select: l.claimer) != nil
   end
 
 end
