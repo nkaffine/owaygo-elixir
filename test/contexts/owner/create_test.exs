@@ -219,7 +219,7 @@ defmodule Owaygo.Owner.CreateTest do
     verify_email(user_id2, "411rockstar@gmail.com")
     attrs = %{claimer_id: user_id, user_id: "user_id2", location_id: location_id}
     assert {:error, changeset} = Create.call(%{params: attrs})
-    assert %{user_id: ["invalid type"]} == errors_on(changeset)
+    assert %{user_id: ["is invalid"]} == errors_on(changeset)
   end
 
   test "reject when the incorrect type is passed for location_id" do
@@ -233,7 +233,7 @@ defmodule Owaygo.Owner.CreateTest do
     verify_email(user_id2, "411rockstar@gmail.com")
     attrs = %{claimer_id: user_id, user_id: user_id2, location_id: "location_id"}
     assert {:error, changeset} = Create.call(%{params: attrs})
-    assert %{location_id: ["invalid type"]} == errors_on(changeset)
+    assert %{location_id: ["is invalid"]} == errors_on(changeset)
   end
 
   test "reject when the incorrect type is passed for claimer_id" do
@@ -247,7 +247,7 @@ defmodule Owaygo.Owner.CreateTest do
     verify_email(user_id2, "411rockstar@gmail.com")
     attrs = %{claimer_id: "user_id", user_id: user_id2, location_id: location_id}
     assert {:error, changeset} = Create.call(%{params: attrs})
-    assert %{claimer_id: ["invalid type"]} == errors_on(changeset)
+    assert %{claimer_id: ["is invalid"]} == errors_on(changeset)
   end
 
 end
