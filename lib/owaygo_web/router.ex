@@ -14,7 +14,12 @@ defmodule OwaygoWeb.Router do
     resources "/user/discoverer/apply", DiscovererApplicationController, only: [:create, :show]
     resources "/discoverer", DiscovererController, only: [:show]
     resources "/location", LocationController, only: [:create]
+<<<<<<< HEAD
     resources "/user/claim", OwnershipClaimController, only: [:create]
+    resources "/owner/claim", OwnerController, only: [:create]
+=======
+    resources "/owner", OwnerController, only: [:create]
+>>>>>>> master
   end
 
   scope "/api/v1/admin", OwaygoWeb do
