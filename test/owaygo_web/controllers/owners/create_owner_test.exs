@@ -67,9 +67,6 @@ defmodule OwaygoWeb.Owners.CreateTest do
     assert body["id"] > 0
     assert body["user_id"] == user_id2
     assert body["location_id"] == location_id
-    assert body["owner_balance"] == 0.0
-    assert body["withdrawal_rate"] == nil
-    assert body["withdrawal_amount"] == nil
   end
 
   test "throw error when given invalid input" do
