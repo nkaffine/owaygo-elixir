@@ -119,7 +119,7 @@ defmodule Owaygo.Owner.Create do
         changeset
       else
         changeset |> Changeset.add_error(:claimer_id,
-        "user is not claimer of location and is not authorized to make this change")
+        "user is not a claimer of the location and is not authorized to add owners")
       end
     else
       changeset

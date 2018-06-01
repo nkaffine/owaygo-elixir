@@ -60,9 +60,8 @@ defmodule OwaygoWeb.Owners.CreateTest do
     user_id2 = create_user(%{username: "kaffine.n", fname: @fname,
     lname: @lname, email: "411rockstar@gmail.com"})
     verify_email(user_id2, "411rockstar@gmail.com")
-    conn = build_conn() |> post("/api/v1/owner", %{claimer_id: user_id,
-    user_id: user_id2, location_id: location_id})
-    body = conn |> response(201) |> Poisions.decode!
+    conn = build_conn() |> post("/api/v1/owner", %{claimer_id: user_id, user_id: user_id2, location_id: location_id})
+    body = conn |> response(201) |> Poison.decode!
     assert body["id"] |> is_integer
     assert body["id"] > 0
     assert body["user_id"] == user_id2
@@ -78,8 +77,8 @@ defmodule OwaygoWeb.Owners.CreateTest do
     verify_email(user_id2, "411rockstar@gmail.com")
     conn = build_conn() |> post("/api/v1/owner", %{claimer_id: user_id,
     user_id: user_id2, location_id: location_id})
-    body = conn |> response(201) |> Poison.decode!
-    assert body["claimer_id"] == ["not authorized to approve owners for this restaurant"]
+    body = conn |> response(400) |> Poison.decode!
+    assert body["claimer_id"] == ["user is not a claimer of the location and is not authorized to add owners"]
   end
 
 

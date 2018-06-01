@@ -14,6 +14,9 @@ defmodule OwaygoWeb.OwnerController do
   end
 
   defp render_owner(conn, owner) do
-    
+    {:ok, body} = %{id: owner.id, user_id: owner.user_id,
+    location_id: owner.location_id}
+    |> Poison.encode
+    conn |> resp(201, body)
   end
 end

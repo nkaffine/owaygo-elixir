@@ -162,7 +162,7 @@ defmodule Owaygo.Owner.CreateTest do
     verify_email(user_id2, "411rockstar@gmail.com")
     attrs = %{claimer_id: user_id2, user_id: user_id, location_id: location_id}
     assert {:error, changeset} = Create.call(%{params: attrs})
-    assert %{claimer_id: ["user is not claimer of location and is not authorized to make this change"]} == errors_on(changeset)
+    assert %{claimer_id: ["user is not a claimer of the location and is not authorized to add owners"]} == errors_on(changeset)
   end
 
   test "reject when the location already has an owner" do
