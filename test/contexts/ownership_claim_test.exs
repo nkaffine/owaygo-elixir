@@ -9,6 +9,7 @@ defmodule Owaygo.User.OwnershipClaimTest do
   alias Owaygo.Repo
   alias Ecto.Changeset
   alias Owaygo.User.OwnershipClaim
+  alias Owaygo.User
 
   @username "nkaffine"
   @fname "Nick"
@@ -140,7 +141,7 @@ defmodule Owaygo.User.OwnershipClaimTest do
     location_id = create_location(user_id, @location_create)
     assert {:error, changeset} = OwnershipClaim.call(%{params:
     %{user_id: "asgas", location_id: location_id}})
-    assert %{user_id: ["invalid type"]} == errors_on(changeset)
+    assert %{user_id: ["is invalid"]} == errors_on(changeset)
   end
 
   test "reject when passing incorrect type of data for location id" do
@@ -148,7 +149,7 @@ defmodule Owaygo.User.OwnershipClaimTest do
     validate_email(user_id, @email)
     assert {:error, changeset} = OwnershipClaim.call(%{params:
     %{user_id: user_id, location_id: "asgjasg"}})
-    assert %{location_id: ["invalid type"]} == errors_on(changeset)
+    assert %{location_id: ["is invalid"]} == errors_on(changeset)
   end
 
   test "reject when the users email has not been validated" do

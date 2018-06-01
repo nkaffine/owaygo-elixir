@@ -40,7 +40,7 @@ defmodule OwaygoWeb.User.OwnershipClaimTest do
     assert body["location_id"] == location
     assert body["user_id"] == id
     assert body["date"] == Date.utc_today |> to_string
-    assert body["status"] == "pending"
+    assert body["status"] == "approved"
   end
 
   test "throw an error when invalid input is passed" do
@@ -51,7 +51,7 @@ defmodule OwaygoWeb.User.OwnershipClaimTest do
     |> Map.put(:email, "411rockstar@gmail.com"))
     attrs = %{user_id: id2, location_id: location}
     conn = build_conn() |> post("/api/v1/user/claim", attrs)
-    body = conn |> response(201) |> Poison.decode!
-    assert body["user_id"] == ["you need to verify your email to make an ownership claim"]
+    body = conn |> response(400) |> Poison.decode!
+    assert body["user_id"] == ["user has not verified their email"]
   end
 end
