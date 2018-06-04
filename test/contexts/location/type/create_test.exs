@@ -6,18 +6,18 @@ defmodule Owaygo.Location.Type.TestCreate do
   @create %{name: @typename}
 
   defp success(create) do
-    assert {:ok, location_type} = Create.call(create)
+    assert {:ok, location_type} = Create.call(%{params: create})
     assert location_type.name == create.name |> String.downcase
     assert location_type.id > 0
   end
 
   defp failure(create, error) do
-    assert {:error, changeset} = Create.call(create)
+    assert {:error, changeset} = Create.call(%{params: create})
     assert error == errors_on(changeset)
   end
 
   defp invalid_name(create) do
-    failure(create, %{name: ["is invalid"]})
+    failure(create, %{name: ["has invalid format"]})
   end
 
   test "accept valid name and return valid response" do
@@ -69,7 +69,7 @@ defmodule Owaygo.Location.Type.TestCreate do
     invalid_name(%{name: "restuarant`"})
     invalid_name(%{name: "restuarant~"})
     invalid_name(%{name: "restuarant'"})
-    invalid_name(%{name: 'restuarant<"'})
+    invalid_name(%{name: "restuarant\""})
     invalid_name(%{name: "restuarant]"})
     invalid_name(%{name: "restuarant["})
     invalid_name(%{name: "restuarant<{"})
