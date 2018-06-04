@@ -9,7 +9,6 @@ defmodule Owaygo.Repo.Migrations.AddLocationTable do
       add :discovery_date, :date, default: fragment("current_date")
       add :discoverer_id, references(:user)
       add :claimer_id, references(:user)
-      #need to add the type and owner once both of those have been implemented
     end
     create index(:location, [:lat, :lng])
     create index(:location, :name)
