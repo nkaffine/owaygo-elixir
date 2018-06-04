@@ -89,6 +89,6 @@ defmodule Owaygo.Location.Type.TestCreate do
 
   test "reject when type name already exists" do
     success(@create)
-    failure(@create, %{name: ["already exists"]})
+    failure(@create, %{name: ["has already been taken"]})
   end
 end
