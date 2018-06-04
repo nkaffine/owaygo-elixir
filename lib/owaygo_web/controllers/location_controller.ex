@@ -16,7 +16,8 @@ defmodule OwaygoWeb.LocationController do
   defp render_location(conn, location) do
     {:ok, body} = %{id: location.id, lat: location.lat, lng: location.lng,
     name: location.name, discovery_date: location.discovery_date,
-    discoverer_id: location.discoverer_id, claimer_id: location.claimer_id} |> Poison.encode
+    discoverer_id: location.discoverer_id, claimer_id: location.claimer_id,
+    type: location.type} |> Poison.encode
     #need to add owner and type when they are implemented
     conn |> resp(201, body)
   end

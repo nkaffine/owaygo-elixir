@@ -40,6 +40,7 @@ defmodule OwaygoWeb.Location.TestCreate do
     assert body["discoverer_id"] == id
     assert body["discovery_date"] == Date.utc_today |> to_string
     assert body["claimer_id"] == nil
+    assert body["type"] == nil
     #need to add owner and type when they are implemented
   end
 
