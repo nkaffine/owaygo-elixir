@@ -3,6 +3,7 @@ defmodule Owaygo.Location.Create do
   alias Ecto.Changeset
   alias Owaygo.Repo
   alias Owaygo.Location
+  alias Owaygo.LocationType
 
   #will eventually be updated to include the type of location
   @all_params [:lat, :lng, :name, :discoverer_id, :type]
@@ -72,6 +73,16 @@ defmodule Owaygo.Location.Create do
   end
 
   defp translate_type(params) do
-
+    if(params |> Map.has_key?(:type)) do
+      if Repo.one!(from t in LocationType, where: t.name == ^params.type,
+      select: count(t.id)) == 1 do
+        params |> Map.put(:type, Repo.one!(from t in LocationType, where: t.name == ^params.type,
+        select: t.id))
+      else
+        params |> Map.delete(:type)
+      end
+    else
+      params
+    end
   end
 end
