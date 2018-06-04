@@ -5,12 +5,13 @@ defmodule Owaygo.Location.Create do
   alias Owaygo.Location
 
   #will eventually be updated to include the type of location
-  @all_params [:lat, :lng, :name, :discoverer_id]
+  @all_params [:lat, :lng, :name, :discoverer_id, :type]
   @required_params [:lat, :lng, :name, :discoverer_id]
 
   def call(%{params: params}) do
     case Repo.transaction fn ->
       params
+      |> translate_type
       |> build_changeset
       |> check_user_exists
       |> check_user_email_verified
@@ -31,6 +32,7 @@ defmodule Owaygo.Location.Create do
     |> Changeset.validate_number(:lng, less_than_or_equal_to: 180,
     greater_than_or_equal_to: -180)
     |> Changeset.foreign_key_constraint(:discoverer_id, message: "user does not exist")
+    |> Changeset.foreign_key_constraint(:type, message: "type doesn't exist")
   end
 
   defp check_user_exists(changeset) do
@@ -67,5 +69,9 @@ defmodule Owaygo.Location.Create do
 
   defp insert_location(changeset) do
     Repo.insert(changeset)
+  end
+
+  defp translate_type(params) do
+
   end
 end
