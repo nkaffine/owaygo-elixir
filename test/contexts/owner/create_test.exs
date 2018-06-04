@@ -70,6 +70,7 @@ defmodule Owaygo.Owner.CreateTest do
     assert owner.owner_balance == 0.0
     assert owner.withdrawal_rate == nil
     assert owner.withdrawal_amount == nil
+    assert owner.inserted_at |> to_string == Date.utc_today |> to_string
   end
 
   test "reject when claimer_id is not passed" do

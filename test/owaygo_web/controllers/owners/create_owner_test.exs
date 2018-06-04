@@ -66,6 +66,7 @@ defmodule OwaygoWeb.Owners.CreateTest do
     assert body["id"] > 0
     assert body["user_id"] == user_id2
     assert body["location_id"] == location_id
+    assert body["owner_since"] == Date.utc_today |> to_string
   end
 
   test "throw error when given invalid input" do
