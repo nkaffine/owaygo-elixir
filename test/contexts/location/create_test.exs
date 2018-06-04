@@ -38,7 +38,7 @@ defmodule Owaygo.Location.TestCreate do
     assert location.discoverer_id == create.discoverer_id
     assert location.claimer_id == nil
     assert location.discovery_date |> to_string == Date.utc_today |> to_string
-    #need to add owner and type once they are implemented
+    assert location.type == nil
   end
 
   defp check_success(create) do
