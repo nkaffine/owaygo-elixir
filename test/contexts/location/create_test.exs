@@ -4,6 +4,7 @@ defmodule Owaygo.Location.TestCreate do
   alias Owaygo.Location.Create
   alias Owaygo.Test.VerifyEmail
   alias Owaygo.User
+  alias Owaygo.Location.Type
 
   @username "nkaffine"
   @fname "Nick"
@@ -30,6 +31,13 @@ defmodule Owaygo.Location.TestCreate do
     %{lat: @lat, lng: @lng, name: @name, discoverer_id: id}
   end
 
+  #Creates a location type and returns the id
+  defp create_type(name) do
+    attrs = %{name: name}
+    {:ok, type} = Type.Create.call(%{params: attrs})
+    type.id
+  end
+
   defp check_location(location, create) do
     assert location.id > 0
     assert location.name == create.name
@@ -38,7 +46,7 @@ defmodule Owaygo.Location.TestCreate do
     assert location.discoverer_id == create.discoverer_id
     assert location.claimer_id == nil
     assert location.discovery_date |> to_string == Date.utc_today |> to_string
-    assert location.type == nil
+    location
   end
 
   defp check_success(create) do
@@ -173,5 +181,18 @@ defmodule Owaygo.Location.TestCreate do
     check_success(create)
   end
 
+  #testing with location types
+  test "passing a valid location type returns the correct location type" do
+    type_id = create_type("super_charger")
+    create = create() |> Map.put(:type, "super_charger")
+    location = check_success(create)
+    assert location.type == type_id
+  end
+
+  test "passing an invalid location type returns a nil for location type" do
+    create = create() |> Map.put(:type, "super_charger")
+    location = check_success(create)
+    assert location.type == nil
+  end
 
 end
