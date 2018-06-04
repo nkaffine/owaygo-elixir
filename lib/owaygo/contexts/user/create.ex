@@ -5,6 +5,7 @@ defmodule Owaygo.User.Create do
   alias Owaygo.Repo
   alias Owaygo.User.ConvertUser
   alias Owaygo.User.UpdateBirthday
+  alias Ecto.Changeset
 
   @create_params [:username, :fname, :lname, :email, :gender, :birthday, :recent_lat, :recent_lng]
   @required_params [:username, :fname, :lname, :email]
@@ -57,7 +58,7 @@ defmodule Owaygo.User.Create do
     |> Ecto.Changeset.validate_format(:fname, ~r/^[a-z]*$/i, message: "names can only contain alphabetic characters")
     |> Ecto.Changeset.validate_format(:lname, ~r/^[a-z]*$/i, message: "names can only contain alphabetic characters")
     |> Ecto.Changeset.validate_format(:email, ~r/@/, message: "invalid email")
-    |> Ecto.Changeset.validate_format(:username, ~r/^[a-z.0-9]*[a-z][a-z.0-9]*$/i, message: "username must contain alphabetic characters")
+    |> validate_username
     |> validate_birthday
     |> Ecto.Changeset.validate_number(:recent_lat, less_than_or_equal_to: 90,
     greater_than_or_equal_to: -90, message: "invalid latitude")
@@ -150,5 +151,21 @@ defmodule Owaygo.User.Create do
         end
       end
     end
+
+  defp validate_username(changeset) do
+    username = changeset |> Changeset.get_change(:username)
+    if(username != nil) do
+      changeset = changeset |> Ecto.Changeset.validate_format(:username, ~r/^[a-z.0-9?,!&]*$/i)
+      if(changeset.valid?) do
+        changeset
+        |> Ecto.Changeset.validate_format(:username, ~r/^[a-z.0-9?,!&]*[a-z][a-z.0-9?,!&]*$/i,
+        message: "username must contain at least one alphabetic character")
+      else
+        changeset
+      end
+    else
+      changeset
+    end
+  end
 
 end

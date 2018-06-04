@@ -10,7 +10,7 @@ defmodule Owaygo.Users.CreateTest do
   @valid_lname "Kaffine"
   @valid_email "nicholas.kaffine@gmail.com"
   @valid_gender "male"
-  @valid_birthday %{year: "1997", month: "09", day: "21"}
+  @valid_birthday %{year: 1997, month: 09, day: 21}
   @valid_birthday_string "1997-09-21"
   @valid_lat 75.12498129
   @valid_lng 118.19248114
@@ -24,6 +24,31 @@ defmodule Owaygo.Users.CreateTest do
   lname: @valid_lname, email: @valid_email}
 
   @invalid_email "nicholas kaffine"
+
+  defp success(create) do
+    assert {:ok, user} = Create.call(%{params: create})
+    assert user.id |> is_integer
+    assert user.id > 0
+    assert user.username == create.username
+    assert user.fname == create.fname
+    assert user.lname == create.lname
+    assert user.email == create.email
+    assert user.gender == create.gender
+    assert user.birthday |> to_string == Date.from_erl!({create.birthday.year,
+    create.birthday.month, create.birthday.day}) |> to_string
+    assert user.coin_balance == 0
+    assert user.fame == 0
+    assert user.recent_lat == create.recent_lat
+    assert user.recent_lng == create.recent_lng
+    assert Repo.one!(from b in "birthday_update", select: count(b.id)) == 1
+    assert Repo.one!(from e in "email_update", select: count(e.id)) == 1
+  end
+
+  defp failure(create, error) do
+    assert {:error, changeset} = Create.call(%{params: create})
+    refute changeset.valid?
+    assert error == errors_on(changeset)
+  end
 
   test "it creates a user" do
     {:ok, user} = Create.call(%{params: @valid_create})
@@ -87,7 +112,7 @@ defmodule Owaygo.Users.CreateTest do
     attrs = @valid_create |> Map.put(:username, String.duplicate("1", 24))
     assert {:error, changeset} = Create.call(%{params: attrs})
     refute changeset.valid?
-    assert %{username: ["username must contain alphabetic characters"]} == errors_on(changeset)
+    assert %{username: ["username must contain at least one alphabetic character"]} == errors_on(changeset)
     no_users_or_emails()
   end
 
@@ -439,6 +464,57 @@ defmodule Owaygo.Users.CreateTest do
 
   test "reject when lname has miscelanious characters" do
     test_lname_rejects("asdfkSDGsdfk@#-$%^&*~~=+)()(*@`)`/'\;:[{}]'")
+  end
+
+  test "reject when username has spaces" do
+    create = @valid_create |> Map.put(:username, "nick kaffine")
+    failure(create, %{username: ["has invalid format"]})
+  end
+
+  describe "accep when username has punctuation" do
+    test "punctuation !" do
+      create = @valid_create |> Map.put(:username, "kaffine!")
+      success(create)
+    end
+
+    test "punctuation ?" do
+      create = @valid_create |> Map.put(:username, "kaffine?")
+      success(create)
+    end
+
+    test "punctuation ." do
+      create = @valid_create |> Map.put(:username, "kaffine.n")
+      success(create)
+    end
+
+    test "punctuation ," do
+      create = @valid_create |> Map.put(:username, "kaffine,nicholas")
+      success(create)
+    end
+  end
+
+  test "accept when username has valid special characters" do
+    create = @valid_create |> Map.put(:username, "nick&nick")
+    success(create)
+  end
+
+  test "reject when username has invalid special characters" do
+    create = @valid_create |> Map.put(:username, "@kaffine")
+    failure(create, %{username: ["has invalid format"]})
+    create = @valid_create |> Map.put(:username, "#kaffine!")
+    failure(create, %{username: ["has invalid format"]})
+    create = @valid_create |> Map.put(:username, "kaf%fine!")
+    failure(create, %{username: ["has invalid format"]})
+    create = @valid_create |> Map.put(:username, "kaff$ne!")
+    failure(create, %{username: ["has invalid format"]})
+    create = @valid_create |> Map.put(:username, "kaffine*!")
+    failure(create, %{username: ["has invalid format"]})
+    create = @valid_create |> Map.put(:username, "kaffin:e!")
+    failure(create, %{username: ["has invalid format"]})
+    create = @valid_create |> Map.put(:username, "ka;ffine!")
+    failure(create, %{username: ["has invalid format"]})
+    create = @valid_create |> Map.put(:username, "kaf`fine!")
+    failure(create, %{username: ["has invalid format"]})
   end
 
 end
