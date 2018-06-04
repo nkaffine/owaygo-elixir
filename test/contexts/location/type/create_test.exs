@@ -25,7 +25,7 @@ defmodule Owaygo.Location.Type.TestCreate do
   end
 
   test "reject name that is longer than 255 characters" do
-    failure(%{name: String.duplicate("a", 255)}, %{name: ["exceeds max number of characters"]})
+    failure(%{name: String.duplicate("a", 256)}, %{name: ["exceeds maximum number of characters"]})
   end
 
   test "accept name with mixed case and return all lowercase" do
