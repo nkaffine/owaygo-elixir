@@ -12,7 +12,9 @@ defmodule OwaygoWeb.LocationTypeController do
   end
 
   def render_location_type(conn, location_type) do
-
+      {:ok, body} = %{id: location_type.id, name: location_type.name}
+      |> Poison.encode
+      conn |> resp(201, body)
   end
 
 end
