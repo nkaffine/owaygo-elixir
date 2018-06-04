@@ -6,7 +6,6 @@ defmodule Owaygo.User.OwnershipClaim do
   alias Owaygo.Owner
   alias Owaygo.User
   alias Owaygo.Location
-  alias Location.Util
 
   @params [:user_id, :location_id]
   @required_params [:user_id, :location_id]
@@ -98,11 +97,11 @@ defmodule Owaygo.User.OwnershipClaim do
         |> Changeset.get_change(:user_id)}, [:claimer_id])
         |> Changeset.validate_required([:claimer_id])
         |> Repo.update do
-          {:ok, value} ->
+          {:ok, _value} ->
             user_id = changeset |> Changeset.get_change(:user_id)
             location_id = changeset |> Changeset.get_change(:location_id)
             case Owner.Util.make_owner(user_id, location_id) do
-              {:ok, value} -> Repo.insert(changeset |> Changeset.put_change(:status, "approved"))
+              {:ok, _value} -> Repo.insert(changeset |> Changeset.put_change(:status, "approved"))
               {:error, value} -> {:error, value}
             end
           {:error, value} -> {:error, value}

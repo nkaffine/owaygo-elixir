@@ -5,7 +5,7 @@ defmodule Owaygo.User.OwnershipClaimTest do
   alias Owaygo.User
   alias Owaygo.Test.VerifyEmail
   alias Owaygo.Location
-  alias Owaygo.Admin.CreateDiscoverer
+  # alias Owaygo.Admin.CreateDiscoverer
   alias Owaygo.Repo
   alias Ecto.Changeset
   alias Owaygo.User.OwnershipClaim
@@ -30,7 +30,7 @@ defmodule Owaygo.User.OwnershipClaimTest do
 
   #validates the email of the user with the given id and email
   defp validate_email(id, email) do
-    assert {:ok, email_verification} = VerifyEmail.call(%{params: %{id: id, email: email}})
+    assert {:ok, _email_verification} = VerifyEmail.call(%{params: %{id: id, email: email}})
   end
 
   #creates a location with the given location information and the given user_id
@@ -41,9 +41,9 @@ defmodule Owaygo.User.OwnershipClaimTest do
     location.id
   end
 
-  defp make_discoverer(user_id) do
-    assert {:ok, discoverer} = CreateDiscoverer.call(%{params: %{id: user_id}})
-  end
+  # defp make_discoverer(user_id) do
+  #   assert {:ok, discoverer} = CreateDiscoverer.call(%{params: %{id: user_id}})
+  # end
 
   defp add_claimer(location_id, user_id) do
     Repo.one(from l in Location, where: l.id == ^location_id)
@@ -160,5 +160,6 @@ defmodule Owaygo.User.OwnershipClaimTest do
     |> Map.put(:email, "411rockstar@gmail.com"))
     assert {:error, changeset} = OwnershipClaim.call(%{params:
     %{user_id: user_id2, location_id: location_id}})
+    assert %{user_id: ["user has not verified their email"]} == errors_on(changeset)
   end
 end
