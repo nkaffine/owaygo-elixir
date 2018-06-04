@@ -4,7 +4,7 @@ defmodule Owaygo.Repo.Migrations.AddDiscovererApplicationTable do
   def change do
     create table(:discoverer_application) do
       add :user_id, references(:user)
-      add :date, :date
+      add :date, :date, default: fragment("current_date")
       add :reason, :string
       add :status, :string
       timestamps()

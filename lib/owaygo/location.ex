@@ -5,7 +5,7 @@ defmodule Owaygo.Location do
     field :lat, :float
     field :lng, :float
     field :name, :string
-    field :discovery_date, :date, default: Ecto.Date.cast!(Date.utc_today)
+    field :discovery_date, :date, read_after_writes: true
     belongs_to :user, Owaygo.User, foreign_key: :discoverer_id
     belongs_to :discoverer, Owaygo.User, foreign_key: :claimer_id
 

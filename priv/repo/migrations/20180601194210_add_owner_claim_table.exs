@@ -3,7 +3,7 @@ defmodule Owaygo.Repo.Migrations.AddOwnerClaimTable do
 
   def change do
     create table(:ownership_claim, primary_key: false) do
-      add :date, :date
+      add :date, :date, default: fragment("current_date")
       add :status, :string
       add :user_id, references(:user)
       add :location_id, references(:location)
