@@ -15,7 +15,7 @@ defmodule OwaygoWeb.Location.TestCreateLocationType do
   test "throws error when given invalid input" do
     conn = build_conn() |> post("/api/v1/admin/location/type", %{name: "1241512"})
     body = conn |> response(400) |> Poison.decode!
-    assert body["name"] == ["is invalid"]
+    assert body["name"] == ["has invalid format"]
   end
 
 end
