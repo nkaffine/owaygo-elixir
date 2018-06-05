@@ -26,6 +26,13 @@ defmodule OwaygoWeb.Location.TestCreate do
     assert body["verification_date"] == Date.utc_today |> to_string
   end
 
+  def create_type(type) do
+    create = %{name: type}
+    conn = build_conn() |> post("/api/v1/admin/location/type", create)
+    body = conn |> response(201) |> Poison.decode!
+    body["id"]
+  end
+
   test "given valid parameters accepts and returns the location information" do
     id = create_user()
     verify_email(id)
@@ -42,6 +49,24 @@ defmodule OwaygoWeb.Location.TestCreate do
     assert body["claimer_id"] == nil
     assert body["type"] == nil
     #need to add owner and type when they are implemented
+  end
+
+  test "given valid parameters and type returns a valid response" do
+    id = create_user()
+    verify_email(id)
+    type = create_type("restaurant")
+    attrs = %{lat: @lat, lng: @lng, name: @name, discoverer_id: id, type: "restaurant"}
+    conn = build_conn() |> post("/api/v1/location", attrs)
+    body = conn |> response(201) |> Poison.decode!
+    assert body["id"] |> is_integer
+    assert body["id"] > 0
+    assert body["lat"] == @lat
+    assert body["lng"] == @lng
+    assert body["name"] == @name
+    assert body["discoverer_id"] == id
+    assert body["discovery_date"] == Date.utc_today |> to_string
+    assert body["claimer_id"] == nil
+    assert body["type"] == type
   end
 
   test "given invalid paramters throws and error" do
