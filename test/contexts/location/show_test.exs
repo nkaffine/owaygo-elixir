@@ -84,7 +84,7 @@ defmodule Owaygo.Location.TestShow do
       assert location.name == @name
       assert location.lat == @lat
       assert location.lng == @lng
-      assert location.discoverer == user_id
+      assert location.discoverer_id == user_id
       assert location.claimer_id == user_id
       assert location.owner_id == user_id
       assert location.discovery_date |> to_string == Date.utc_today |> to_string
@@ -101,31 +101,48 @@ defmodule Owaygo.Location.TestShow do
     make_type("restaurant")
     location_id = create_location(user_id1, "restaurant")
     make_discoverer(user_id2)
+    claim(user_id2, location_id)
     claim_ownership(user_id3, location_id)
     assert {:ok, location} = Show.call(%{params: %{id: location_id}})
     assert location.id == location_id
     assert location.name == @name
     assert location.lat == @lat
     assert location.lng == @lng
-    assert location.discoverer == user_id1
+    assert location.discoverer_id == user_id1
     assert location.claimer_id == user_id2
     assert location.owner_id == user_id3
     assert location.discovery_date |> to_string == Date.utc_today |> to_string
     assert location.type == "restaurant"
   end
 
+  test "returns propper values when there is no owner or claimer or type" do
+    user_id = create_user(@username, @email)
+    verify_email(user_id, @email)
+    location_id = create_location(user_id)
+    assert {:ok, location} = Show.call(%{params: %{id: location_id}})
+    assert location.id == location_id
+    assert location.name == @name
+    assert location.lat == @lat
+    assert location.lng == @lng
+    assert location.discoverer_id == user_id
+    assert location.claimer_id == nil
+    assert location.owner_id == nil
+    assert location.discovery_date |> to_string == Date.utc_today |> to_string
+    assert location.type == nil
+  end
+
   test "throw error when given a location that does not exist" do
     assert {:error, changeset} = Show.call(%{params: %{id: 123}})
-    assert %{id: ["location does not exist"]} == errors_on(changeset)
+    assert %{id: ["location does not exist"]} == changeset
   end
 
   test "throw error when no location is passed" do
     assert {:error, changeset} = Show.call(%{params: %{}})
-    assert %{id: ["can't be blank"]} == errors_on(changeset)
+    assert %{id: ["can't be blank"]} == changeset
   end
 
   test "throw error when location_id is the wrong type" do
-    assert {:error, changeset} = Show.call(%{params: %{id: "1124"}})
-    assert %{id: ["is invalid"]} == errors_on(changeset)
+    assert {:error, changeset} = Show.call(%{params: %{id: "asfasf"}})
+    assert %{id: ["is invalid"]} == changeset
   end
 end

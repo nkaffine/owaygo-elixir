@@ -71,13 +71,13 @@ defmodule OwaygoWeb.Location.TestShow do
     assert body["lng"] == @lng
     assert body["discoverer_id"] == user_id
     assert body["discovery_date"] == Date.utc_today |> to_string
-    assert body["claimer_id"] == nil
+    assert body["claimer_id"] == user_id
     assert body["type"] == "restaurant"
   end
 
   test "throws error when given invalid paramters" do
     conn = build_conn() |> get(location_path(build_conn(), :show, 123))
-    body = conn |> response(201) |> Poison.decode!
+    body = conn |> response(400) |> Poison.decode!
     assert body["id"] == ["location does not exist"]
   end
 
