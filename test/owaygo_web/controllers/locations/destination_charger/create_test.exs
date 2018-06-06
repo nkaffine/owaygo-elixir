@@ -69,7 +69,7 @@ defmodule OwaygoWeb.Location.DestinationCharger.CreateTest do
     state: @state, zip: @zip, country: @country, tesla_id: @tesla_id,
     discoverer_id: user_id}
     conn = build_conn() |> post("/api/v1/location/destination-charger", create)
-    body = conn |> response(201) |> Poison.decode!
+    body = conn |> response(400) |> Poison.decode!
     assert body["discoverer_id"] == ["email has not been verified"]
   end
 
