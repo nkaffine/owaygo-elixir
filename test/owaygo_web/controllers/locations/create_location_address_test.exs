@@ -60,8 +60,8 @@ defmodule OwaygoWeb.Location.TestCreateLocationAddress do
     create = %{location_id: 123, street: @street, city: @city,
     state: @state, zip: @zip, country: @country}
     conn = build_conn() |> post("/api/v1/location/address", create)
-    body = conn |> response(201) |> Poison.decode!
-    assert body["location_id"] == ["location does not exist"]
+    body = conn |> response(400) |> Poison.decode!
+    assert body["location_id"] == ["does not exist"]
   end
 
 end
