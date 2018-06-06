@@ -185,7 +185,7 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
 
     test "reject when name is more than 255 characters" do
       check_error(create() |> Map.put(:name, String.duplicate("a", 256)),
-      %{name: ["should be at most 255 characters"]})
+      %{name: ["invalid length"]})
     end
   end
 
@@ -329,12 +329,12 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
 
     test "reject when open date is in the future" do
       check_error(create() |> Map.put(:open_date, Date.utc_today |> Date.add(1)),
-      %{date: ["open date must today or earlier"]})
+      %{open_date: ["must be today or earlier"]})
     end
 
     test "reject when date is not a date" do
       check_error(create() |> Map.put(:open_date, "jdkasdg"),
-      %{date: ["is invalid"]})
+      %{open_date: ["is invalid"]})
     end
   end
 
