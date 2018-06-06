@@ -19,10 +19,11 @@ defmodule OwaygoWeb.SuperchargerController do
     {:ok, body} = %{id: supercharger.location_id, name: supercharger.location.name,
     lat: supercharger.location.lat, lng: supercharger.location.lng,
     stalls: supercharger.stalls, sc_info_id: supercharger.sc_info_id,
-    state: supercharger.status, open_date: supercharger.open_date,
-    discoverer_id: supercharger.discoverer_id,
+    status: supercharger.status, open_date: supercharger.open_date,
+    discoverer_id: supercharger.location.discoverer_id,
     claimer_id: supercharger.location.claimer_id,
-    type: supercharger.location.type} |> Poison.encode
+    type: supercharger.location.type,
+    discovery_date: supercharger.location.discovery_date} |> Poison.encode
     conn |> resp(201, body)
   end
 end
