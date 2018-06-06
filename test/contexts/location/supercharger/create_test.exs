@@ -1,10 +1,12 @@
 defmodule Owaygo.Location.Supercharger.TestCreate do
   use Owaygo.DataCase
+  import Ecto.Query
 
   alias Owaygo.User
   alias Owaygo.Test.VerifyEmail
   alias Owaygo.Location.Type
   alias Owaygo.Location.Supercharger.Create
+  alias Owaygo.LocationType
 
   @username "nkaffine"
   @fname "nick"
@@ -47,7 +49,6 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
 
   defp create_without_email_verification() do
     user_id = create_user()
-    verify_email(user_id, @email)
     create_type()
     create = %{name: @name, lat: @lat, lng: @lng, stalls: @stalls,
     sc_info_id: @sc_info_id, status: @status, open_date: @open_date,
@@ -92,7 +93,11 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
     end
     assert supercharger.location.discoverer_id == create.discoverer_id
     assert supercharger.location.claimer_id == nil
-    assert supercharger.location.type == "supercharger"
+    if(Repo.one!(from t in LocationType, where: t.name == "supercharger", select: count(t.id)) == 0) do
+      assert supercharger.location.type == nil
+    else
+      assert supercharger.location.type == "supercharger"
+    end
     assert supercharger.location.discovery_date |> to_string == Date.utc_today |> to_string
   end
 
@@ -156,7 +161,7 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
 
     test "reject when user has not verified their email" do
       check_error(create_without_email_verification(),
-      %{discoverer_id: ["user has not verified their email"]})
+      %{discoverer_id: ["email has not been verified"]})
     end
 
     test "reject when user does not exist" do
@@ -166,7 +171,7 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
     end
 
     test "reject when supercharger type has not been created" do
-      check_error(create_without_type(), %{type: ["does not exist"]})
+      check_success(create_without_type())
     end
 
     test "accept when supercharger type has been created" do
