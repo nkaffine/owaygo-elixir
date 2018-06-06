@@ -18,6 +18,7 @@ defmodule OwaygoWeb.Router do
     resources "/owner", OwnerController, only: [:create]
     resources "/location/address", LocationAddressController, only: [:create]
     resources "/location/supercharger", SuperchargerController, only: [:create]
+    resources "/location/destination-charger", DestinationChargerController, only: [:create]
   end
 
   scope "/api/v1/admin", OwaygoWeb do
