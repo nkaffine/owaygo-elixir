@@ -1,8 +1,10 @@
 defmodule Owaygo.Location.DestinationCharger.CreateTest do
+  use Owaygo.DataCase
   alias Owaygo.Location.DestinationCharger.Create
   alias Owaygo.User
   alias Owaygo.Test.VerifyEmail
   alias Owago.Location.Type
+  alias Owaygo.LocationType
 
   @username "nkaffine"
   @fname "nick"
@@ -23,7 +25,7 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
 
   defp create_user() do
     create = %{username: @username, fname: @fname, lname: @lname, email: @email}
-    assert {:ok, user} = User.Create(%{params: create})
+    assert {:ok, user} = User.Create.call(%{params: create})
     user.id
   end
 
@@ -36,7 +38,51 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
     assert {:ok, _type} = Type.Create.call(%{name: "destination_charger"})
   end
 
-  test "given valid parameters returns valid response"
+  defp create() do
+    user_id = create_user()
+    verify_email(user_id, @email)
+    create_type
+    create = %{name: @name, lat: @lat, lng: @lng, street: @street, city: @city,
+    state: @state, zip: @zip, country: @country, tesla_id: @tesla_id,
+    discoverer_id: user_id}
+  end
+
+  defp check_if_exists(key, destination_charger, create) do
+    if(create |> Map.has_key?(key)) do
+      assert destination_charger |> Map.get(key) == create |> Map.get(key)
+    else
+      assert destination_charger |> Map.get(key) == nil
+    end
+  end
+
+  defp check_success(create) do
+    assert {:ok, destination_charger} = Create.call(%{params: create})
+    assert destination_charger.location_id > 0
+    assert destination_charger.location.name == create.name
+    assert destination_charger.location.lat == create.lat
+    assert destination_charger.location.lng == create.lng
+    check_if_exists(:street, destination_charger.location.address, create)
+    check_if_exists(:city, destination_charger.location.address, create)
+    check_if_exists(:state, destination_charger.location.address, create)
+    check_if_exists(:zip, destination_charger.location.address, create)
+    check_if_exists(:country, destination_charger.location.address, create)
+    check_if_exists(:tesla_id, destination_charger, create)
+    assert destination_charger.location.claimer_id == nil
+    assert destination_charger.location.discovery_date == Date.utc_today |> to_string
+    if(Repo.one!(from t in LocationType,
+    where: t.name == "destination_charger", select: count(t.id)) == 1) do
+      assert destination_charger.location.type == "destination_charger"
+    else
+      assert destination_charger.location.type == nil
+    end
+  end
+
+  defp check_error(create, error) do
+    assert {:error, changeset} = Create.call(%{params: create})
+    assert error == errors_on(changeset)
+  end
+
+  test "given valid parameters return valid response"
 
   describe "test missing paramters" do
     test "accept when tesla_id is missing"
