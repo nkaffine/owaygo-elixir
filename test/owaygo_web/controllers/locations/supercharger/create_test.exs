@@ -49,7 +49,7 @@ defmodule OwaygoWeb.Location.Supercharger.CreateTest do
     assert body["lng"] == @lng
     assert body["stalls"] == @stalls
     assert body["sc_info_id"] == @sc_info_id
-    assert body["status"] == @status
+    assert body["status"] == @status |> String.downcase
     assert body["open_date"] == @open_date
     assert body["discoverer_id"] == user_id
     assert body["discovery_date"] == Date.utc_today |> to_string
@@ -64,8 +64,8 @@ defmodule OwaygoWeb.Location.Supercharger.CreateTest do
     sc_info_id: @sc_info_id, status: @status, open_date: @open_date,
     discoverer_id: user_id}
     conn = build_conn() |> post("/api/v1/location/supercharger", create)
-    body = conn |> response(201) |> Poison.decode!
-    assert body["user_id"] == ["user has not verified their email"]
+    body = conn |> response(400) |> Poison.decode!
+    assert body["discoverer_id"] == ["email has not been verified"]
   end
 
 end
