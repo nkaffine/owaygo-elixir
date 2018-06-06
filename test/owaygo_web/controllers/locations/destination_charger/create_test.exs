@@ -50,11 +50,11 @@ defmodule OwaygoWeb.Location.DestinationCharger.CreateTest do
     assert body["name"] == @name
     assert body["lat"] == @lat
     assert body["lng"] == @lng
-    assert body["street"] == @street
-    assert body["city"] == @city
-    assert body["state"] == @state
-    assert body["zip"] == @zip
-    assert body["country"] == @country
+    assert body["address"]["street"] == @street
+    assert body["address"]["city"] == @city
+    assert body["address"]["state"] == @state
+    assert body["address"]["zip"] == @zip
+    assert body["address"]["country"] == @country
     assert body["tesla_id"] == @tesla_id
     assert body["discoverer_id"] == user_id
     assert body["discovery_date"] == Date.utc_today |> to_string
