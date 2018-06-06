@@ -86,7 +86,7 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
       assert supercharger.status == nil
     end
     if(create |> Map.has_key?(:open_date)) do
-      assert supercharger.open_date == create.open_date
+      assert supercharger.open_date |> to_string == create.open_date |> to_string
     else
       assert supercharger.open_date == nil
     end
