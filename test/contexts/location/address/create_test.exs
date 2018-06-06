@@ -50,7 +50,7 @@ defmodule Owaygo.Location.Address.TestCreate do
 
   defp create() do
     location_id = create_location()
-    create = %{location_id: location_id, street: @street, city: @city,
+    %{location_id: location_id, street: @street, city: @city,
     state: @state, zip: @zip, country: @country}
   end
 
@@ -60,7 +60,12 @@ defmodule Owaygo.Location.Address.TestCreate do
     assert address.street == create.street
     assert address.city == create.city
     assert address.state == create.state
-    assert address.zip == create.zip
+    if(create.zip |> is_bitstring) do
+      {zip, _decimal} = Integer.parse(create.zip)
+      assert address.zip == zip
+    else
+      assert address.zip == create.zip
+    end
     if(create |> Map.has_key?(:country)) do
       assert address.country == create.country
     else
@@ -165,7 +170,7 @@ defmodule Owaygo.Location.Address.TestCreate do
     end
 
     test "accept when street has spaces" do
-      check_success(create() |> Map.put(:street, "asjdfjasdf jasdfj asdfj"))
+      check_success(create() |> Map.put(:street, "a124sjdfjasdf jasdfj asdfj"))
     end
 
     test "accept when street has exactly 255 characters" do
@@ -178,27 +183,27 @@ defmodule Owaygo.Location.Address.TestCreate do
 
     test "reject when street doesn't have spaces" do
       check_error(create() |> Map.put(:street, "jasdkas124125dgjasdlkgjasdgk"),
-      %{street: ["is invalid"]})
+      %{street: ["has invalid format"]})
     end
 
     test "reject when street are no numerals in the street" do
       check_error(create() |> Map.put(:street, "hasdkjasdgkjasd hasdfjg"),
-      %{street: ["is invalid"]})
+      %{street: ["has invalid format"]})
     end
 
     test "reject when street are no characters in the street" do
       check_error(create() |> Map.put(:street, "192481249124"),
-      %{street: ["is invalid"]})
+      %{street: ["has invalid format"]})
     end
 
     test "reject when street contains an !" do
       check_error(create() |> Map.put(:street, "123 sdfasdfjhj!"),
-      %{street: ["is invalid"]})
+      %{street: ["has invalid format"]})
     end
 
     test "reject when street cotains a ?" do
       check_error(create() |> Map.put(:street, "123 jasdfkasdg ?"),
-      %{street: ["is invalid"]})
+      %{street: ["has invalid format"]})
     end
 
     test "reject when street contains _" do
@@ -238,7 +243,7 @@ defmodule Owaygo.Location.Address.TestCreate do
 
     test "reject when street has more than 255 characters" do
       check_error(create() |> Map.put(:street, "123 jasdfk" <> String.duplicate("a", 255)),
-      %{street: ["has invalid format"]})
+      %{street: ["should be at most 255 characters"]})
     end
   end
 
@@ -328,15 +333,15 @@ defmodule Owaygo.Location.Address.TestCreate do
     end
 
     test "reject when zip code is more than 5 digits" do
-      check_error(create() |> Map.put(:zip, 102401), %{zip: ["is invalid"]})
+      check_error(create() |> Map.put(:zip, 102401), %{zip: ["must be less than or equal to 99999"]})
     end
 
     test "reject when zip code is negative" do
-      check_error(create() |> Map.put(:zip, -12400), %{zip: ["is invalid"]})
+      check_error(create() |> Map.put(:zip, -12400), %{zip: ["must be greater than 0"]})
     end
 
     test "reject when zip code is 5 0's" do
-      check_error(create() |> Map.put(:zip, 00000), %{zip: ["is invalid"]})
+      check_error(create() |> Map.put(:zip, 00000), %{zip: ["must be greater than 0"]})
     end
   end
 
@@ -351,12 +356,12 @@ defmodule Owaygo.Location.Address.TestCreate do
 
     test "reject when country has numerals" do
       check_error(create() |> Map.put(:country, "jasdfjjasd91249129sdf"),
-      %{country: ["is invalid"]})
+      %{country: ["has invalid format"]})
     end
 
     test "reject when country has punctuation" do
       create = create()
-      error = %{country: ["has invalid type"]}
+      error = %{country: ["has invalid format"]}
       check_error(create |> Map.put(:country, "jhasdfjk!jsdfk"), error)
       check_error(create |> Map.put(:country, "jafkasdfk?kasdfj"), error)
       check_error(create |> Map.put(:country, "jasdfkkasdasd,asdfk"), error)
@@ -364,15 +369,15 @@ defmodule Owaygo.Location.Address.TestCreate do
     end
 
     test "reject when country has special characters" do
-      error = %{country: ["has invalid type"]}
+      error = %{country: ["has invalid format"]}
       create = create()
       @special_char_strings |> Enum.each(fn(value) -> value
-      |> check_invalid_value(create, :state, error) end)
+      |> check_invalid_value(create, :country, error) end)
     end
 
     test "reject when country has _" do
       check_error(create() |> Map.put(:country, "jasdfkkasd_ksdfjas"),
-      %{country: ["has invalid type"]})
+      %{country: ["has invalid format"]})
     end
   end
 
