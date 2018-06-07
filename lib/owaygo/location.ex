@@ -9,6 +9,7 @@ defmodule Owaygo.Location do
     belongs_to :user, Owaygo.User, foreign_key: :discoverer_id
     belongs_to :discoverer, Owaygo.User, foreign_key: :claimer_id
     belongs_to :location_type, Owaygo.LocationType, foreign_key: :type
+    has_one :address, Owaygo.LocationAddress
   end
 
 end
