@@ -8,29 +8,8 @@ defmodule Owaygo.Location.Address.Create do
 
   def call(%{params: params}) do
     params
-    |> check_zipcode_length
     |> build_changeset
     |> insert
-  end
-
-  defp check_zipcode_length(params) do
-    if(params |> Map.has_key?(:zip)) do
-      if not(params.zip |> is_integer) do
-        if params.zip |> is_bitstring do
-          if params.zip |> String.length != 5 do
-            params |> Map.put(:zip, "jafj")
-          else
-            params
-          end
-        else
-          params
-        end
-      else
-        params
-      end
-    else
-      params
-    end
   end
 
   defp build_changeset(params) do
@@ -41,7 +20,8 @@ defmodule Owaygo.Location.Address.Create do
     |> Changeset.validate_length(:city, max: 255, message: "should be at most 255 characters")
     |> Changeset.validate_length(:state, max: 255, message: "should be at most 255 characters")
     |> Changeset.validate_length(:country, max: 255, message: "should be at most 255 characters")
-    |> Changeset.validate_number(:zip, greater_than: 0, less_than_or_equal_to: 99999)
+    |> Changeset.validate_length(:zip, is: 5, message: "should be 5 characters")
+    |> validate_zip
     |> check_street
     |> Changeset.validate_format(:city, ~r/^[a-z ][a-z ]*$/i)
     |> Changeset.validate_format(:state, ~r/^[a-z ][a-z ]*$/i)
@@ -64,6 +44,19 @@ defmodule Owaygo.Location.Address.Create do
         changeset
       else
         changeset |> Changeset.add_error(:street, "has invalid format")
+      end
+    else
+      changeset
+    end
+  end
+
+  defp validate_zip(changeset) do
+    zip = changeset |> Changeset.get_field(:zip)
+    if(zip != nil) do
+      if(Regex.match?(~r/^[0-9]*$/, zip) and Regex.match?(~r/^((?!00000).)*$/, zip)) do
+        changeset
+      else
+        changeset |> Changeset.add_error(:zip, "has invalid format")
       end
     else
       changeset
