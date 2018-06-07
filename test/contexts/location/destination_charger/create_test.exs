@@ -168,7 +168,7 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
     test "reject when discoverer_id does not exists" do
       create = create()
       check_error(create |> Map.put(:discoverer_id, create.discoverer_id + 1),
-      %{discoverer_id: ["does not exist"]})
+      %{discoverer_id: ["user does not exist"]})
     end
 
     test "reject when discoverer_id has not verified their email" do
@@ -198,7 +198,7 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
 
     test "reject when lat is greater than 90" do
       check_error(create() |> Map.put(:lat, 90.12501),
-      %{lat: ["must be less thna or equal to 90"]})
+      %{lat: ["must be less than or equal to 90"]})
     end
 
     test "reject when lat is less than -90" do
@@ -240,12 +240,12 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
   describe "testing validity of tesla_id" do
     test "reject when tesla id does not start with dc" do
       check_error(create() |> Map.put(:tesla_id, "jasfjaaasf"),
-      %{tesla_id: ["is invalid"]})
+      %{tesla_id: ["has invalid format"]})
     end
 
     test "reject when tesla does not only have numerals after the first two characters" do
       check_error(create() |> Map.put(:tesla_id, "dc81249j101"),
-      %{tesla_id: ["is invalid"]})
+      %{tesla_id: ["has invalid format"]})
     end
 
     test "reject when tesla_id is longer than 255 characters" do
@@ -322,7 +322,7 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
 
     test "reject when street has more than 255 characters" do
       check_error(create() |> Map.put(:street, "123 jasdfk" <> String.duplicate("a", 255)),
-      %{street: ["has invalid format"]})
+      %{street: ["should be at most 255 characters"]})
     end
   end
 
