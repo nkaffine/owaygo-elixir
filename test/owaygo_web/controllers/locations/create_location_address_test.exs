@@ -13,7 +13,7 @@ defmodule OwaygoWeb.Location.TestCreateLocationAddress do
   @street "50 forsyth st."
   @city "Boston"
   @state "MA"
-  @zip 02115
+  @zip "02115"
   @country "United States"
 
   #Creates a new user and returns the user_id
