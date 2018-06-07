@@ -18,7 +18,7 @@ defmodule Owaygo.Location.Address.TestCreate do
   @street "50 forsyth st."
   @city "Boston"
   @state "MA"
-  @zip 02115
+  @zip "02115"
   @country "United States"
 
   @special_char_strings ["ajsdf`kasdfk", "ajsdfk@asdfk", "ajsdfk~asdfk",
@@ -60,12 +60,7 @@ defmodule Owaygo.Location.Address.TestCreate do
     assert address.street == create.street
     assert address.city == create.city
     assert address.state == create.state
-    if(create.zip |> is_bitstring) do
-      {zip, _decimal} = Integer.parse(create.zip)
-      assert address.zip == zip
-    else
-      assert address.zip == create.zip
-    end
+    assert address.zip == create.zip
     if(create |> Map.has_key?(:country)) do
       assert address.country == create.country
     else
@@ -151,7 +146,7 @@ defmodule Owaygo.Location.Address.TestCreate do
     assert address.zip == @zip
     assert address.country == @country
     create = %{location_id: create.location_id, street: "11 Moran Road", city: "Billerica",
-    state: "MA", zip: 01862, country: "United States"}
+    state: "MA", zip: "01862", country: "United States"}
     assert {:error, changeset} = Create.call(%{params: create})
     assert %{location_id: ["location already has address"]} == errors_on(changeset)
   end
@@ -320,28 +315,58 @@ defmodule Owaygo.Location.Address.TestCreate do
   end
 
   describe "reject when zip code is invalid" do
-    test "accept when zip code is all numerals and 5 digits" do
-      check_success(create() |> Map.put(:zip, 12801))
-    end
-
-    test "accept when zip code is a numeral string with 5 characters" do
+    test "accept when zip has only 5 numerals" do
       check_success(create() |> Map.put(:zip, "18294"))
     end
 
-    test "reject when zip code is not an integer" do
-      check_error(create() |> Map.put(:zip, "139jasdfj"), %{zip: ["is invalid"]})
+    test "reject when zip has less than 5 numerals" do
+      check_error(create() |> Map.put(:zip, "124"),
+      %{zip: ["should be 5 characters"]})
     end
 
-    test "reject when zip code is more than 5 digits" do
-      check_error(create() |> Map.put(:zip, 102401), %{zip: ["must be less than or equal to 99999"]})
+    test "reject when zip has more than 5 numerals" do
+      check_error(create() |> Map.put(:zip, "124511"),
+      %{zip: ["should be 5 characters"]})
     end
 
-    test "reject when zip code is negative" do
-      check_error(create() |> Map.put(:zip, -12400), %{zip: ["must be greater than 0"]})
+    test "reject when zip has alphabetic characters" do
+      check_error(create() |> Map.put(:zip, "12asv"),
+      %{zip: ["has invalid format"]})
     end
 
-    test "reject when zip code is 5 0's" do
-      check_error(create() |> Map.put(:zip, 00000), %{zip: ["must be greater than 0"]})
+    test "reject whne zip has punctuation" do
+      create = create()
+      error = %{zip: ["has invalid format"]}
+      check_error(create |> Map.put(:zip, "123?1"), error)
+      check_error(create |> Map.put(:zip, "12!12"), error)
+      check_error(create |> Map.put(:zip, "123.1"), error)
+      check_error(create |> Map.put(:zip, "124,1"), error)
+    end
+
+    test "reject when zip has special characters" do
+      create = create()
+      special_char_strings = ["f`kfk", "k@asd", "k~asd",
+      "k#asd", "k$asd", "k%asd", "k^asd",
+      "k&asd", "k*asd", "k(asd", "k)asd",
+      "k$asd", "k+asd", "k=asd", "k\\asd",
+      "k]asd", "k[asd", "k|asd", "k}asd",
+      "k{asd", "k<asd", "k>asd", "k:asd",
+      "k;asd", "k'asd", "k\"asd"]
+      special_char_strings |> Enum.each(fn(value) ->
+        check_error(create |> Map.put(:zip, value), %{zip: ["has invalid format"]})
+      end)
+    end
+
+    test "reject when zip has spaces" do
+      check_error(create() |> Map.put(:zip, "12 23"), %{zip: ["has invalid format"]})
+    end
+
+    test "reject when zip has _" do
+      check_error(create() |> Map.put(:zip, "12_12"), %{zip: ["has invalid format"]})
+    end
+
+    test "reject when zip is 00000" do
+      check_error(create() |> Map.put(:zip, "00000"), %{zip: ["has invalid format"]})
     end
   end
 
