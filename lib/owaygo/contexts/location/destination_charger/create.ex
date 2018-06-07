@@ -5,6 +5,7 @@ defmodule Owaygo.Location.DestinationCharger.Create do
   alias Owaygo.Repo
   alias Ecto.Changeset
   alias Owaygo.DestinationCharger
+  alias Owaygo.LocationType
 
   @attributes [:location_id, :tesla_id]
   @required_attributes [:location_id]
@@ -26,7 +27,8 @@ defmodule Owaygo.Location.DestinationCharger.Create do
   #tuple with {:ok, location} and params if the insert was succesful or a
   #tuple with the {:error, changeset} and parameters
   defp insert_location(params) do
-    {Location.Create.call(%{params: params}), params |> IO.inspect}
+    {Location.Create.call(%{params: params |> Map.put(:type, "destination_charger")}),
+    params}
   end
 
   #If locaiton is {:ok, location}, and all the address paramters are present,
@@ -105,12 +107,19 @@ defmodule Owaygo.Location.DestinationCharger.Create do
         {:error, changeset} -> {:error, changeset}
         {:ok, destination_charger} ->
           {:ok, location} = location
+          location = %{location | type: location.type |> convert_type}
           if(address != nil) do
             {:ok, address} = address
             location = %{location | address: address}
           end
           {:ok, %{destination_charger | location: location}}
       end
+    end
+  end
+
+  defp convert_type(type) do
+    if(type != nil) do
+      Repo.one!(from t in LocationType, where: t.id == ^type, select: t.name)
     end
   end
 end
