@@ -368,6 +368,10 @@ defmodule Owaygo.Location.Address.TestCreate do
     test "reject when zip is 00000" do
       check_error(create() |> Map.put(:zip, "00000"), %{zip: ["has invalid format"]})
     end
+
+    test "reject when zip is not a string" do
+      check_error(create() |> Map.put(:zip, 12341), %{zip: ["is invalid"]})
+    end
   end
 
   describe "reject when country is invalid" do

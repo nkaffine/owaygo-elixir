@@ -13,7 +13,7 @@ defmodule OwaygoWeb.Location.DestinationCharger.CreateTest do
   @street "50 forsyth st."
   @city "Boston"
   @state "MA"
-  @zip 02115
+  @zip "02115"
   @country "United States"
 
   @tesla_id "dc12040"

@@ -18,7 +18,7 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
   @street "50 forsyth st."
   @city "Boston"
   @state "MA"
-  @zip 02115
+  @zip "02115"
   @country "United States"
 
   @tesla_id "dc12040"
@@ -80,12 +80,7 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
     check_if_exists(:street, destination_charger.location.address, create)
     check_if_exists(:city, destination_charger.location.address, create)
     check_if_exists(:state, destination_charger.location.address, create)
-    if(create |> Map.has_key?(:zip) and not(create.zip |> is_integer)) do
-      {num, _dec} = create.zip |> Integer.parse
-      check_if_exists(:zip, destination_charger.location.address, create |> Map.put(:zip, num))  
-    else
-      check_if_exists(:zip, destination_charger.location.address, create)
-    end
+    check_if_exists(:zip, destination_charger.location.address, create)
     check_if_exists(:country, destination_charger.location.address, create)
     check_if_exists(:tesla_id, destination_charger, create)
     assert destination_charger.location.claimer_id == nil
@@ -187,8 +182,8 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
     end
 
     test "reject when discoverer_id is not positive" do
-      check_error(create() |> Map.put(:discoverer, -1245),
-      %{discoverer_id: ["is invalid"]})
+      check_error(create() |> Map.put(:discoverer_id, -1245),
+      %{discoverer_id: ["user does not exist"]})
     end
   end
 
@@ -404,37 +399,58 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
   end
 
   describe "test zip values" do
-    test "accept when zip code is all numerals and 5 digits" do
-      check_success(create() |> Map.put(:zip, 18240))
+    test "accept when zip has only 5 numerals" do
+      check_success(create() |> Map.put(:zip, "12341"))
     end
 
-    test "accept when zip code is a numeral string with 5 characters" do
-      check_success(create() |> Map.put(:zip, "18401"))
+    test "reject when zip has less than 5 numerals" do
+      check_error(create() |> Map.put(:zip, "1234"),
+      %{zip: ["should be 5 characters"]})
     end
 
-    test "reject when zip code is not an integer" do
-      check_error(create() |> Map.put(:zip, "jasfk"),
-      %{zip: ["is invalid"]})
+    test "reject when zip has more than 5 numerals" do
+      check_error(create() |> Map.put(:zip, "123456"),
+      %{zip: ["should be 5 characters"]})
     end
 
-    test "reject when zip code is more than 5 digits" do
-      check_error(create() |> Map.put(:zip, 182410),
-      %{zip: ["must be less than or equal to 99999"]})
+    test "reject when zip has alphabetic characters" do
+      check_error(create() |> Map.put(:zip, "123ab"),
+      %{zip: ["has invalid format"]})
     end
 
-    test "reject when zip code is negative" do
-      check_error(create() |> Map.put(:zip, -71299),
-      %{zip: ["must be greater than 0"]})
+    test "reject whne zip has punctuation" do
+      check_error(create() |> Map.put(:zip, "123?1"),
+      %{zip: ["has invalid format"]})
     end
 
-    test "reject when zip code is 5 0's" do
-      check_error(create() |> Map.put(:zip, 00000),
-      %{zip: ["must be greater than 0"]})
+    test "reject when zip has special characters" do
+      create = create()
+      special_char_strings = ["f`kfk", "k@asd", "k~asd",
+      "k#asd", "k$asd", "k%asd", "k^asd",
+      "k&asd", "k*asd", "k(asd", "k)asd",
+      "k$asd", "k+asd", "k=asd", "k\\asd",
+      "k]asd", "k[asd", "k|asd", "k}asd",
+      "k{asd", "k<asd", "k>asd", "k:asd",
+      "k;asd", "k'asd", "k\"asd"]
+      special_char_strings |> Enum.each(fn(value) ->
+        check_error(create |> Map.put(:zip, value), %{zip: ["has invalid format"]})
+      end)
     end
 
-    test "reject when zip is less than 5 digits" do
-      check_error(create() |> Map.put(:zip, 123),
-      %{zip: ["is invalid"]})
+    test "reject when zip has spaces" do
+      check_error(create() |> Map.put(:zip, "123 1"), %{zip: ["has invalid format"]})
+    end
+
+    test "reject when zip has _" do
+      check_error(create() |> Map.put(:zip, "123_1"), %{zip: ["has invalid format"]})
+    end
+
+    test "reject when zip is 00000" do
+      check_error(create() |> Map.put(:zip, "00000"), %{zip: ["has invalid format"]})
+    end
+
+    test "reject when zip is not string" do
+      check_error(create() |> Map.put(:zip, 12345), %{zip: ["is invalid"]})
     end
   end
 
