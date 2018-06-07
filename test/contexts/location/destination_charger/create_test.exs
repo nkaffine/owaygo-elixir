@@ -80,11 +80,16 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
     check_if_exists(:street, destination_charger.location.address, create)
     check_if_exists(:city, destination_charger.location.address, create)
     check_if_exists(:state, destination_charger.location.address, create)
-    check_if_exists(:zip, destination_charger.location.address, create)
+    if(create |> Map.has_key?(:zip) and not(create.zip |> is_integer)) do
+      {num, _dec} = create.zip |> Integer.parse
+      check_if_exists(:zip, destination_charger.location.address, create |> Map.put(:zip, num))  
+    else
+      check_if_exists(:zip, destination_charger.location.address, create)
+    end
     check_if_exists(:country, destination_charger.location.address, create)
     check_if_exists(:tesla_id, destination_charger, create)
     assert destination_charger.location.claimer_id == nil
-    assert destination_charger.location.discovery_date == Date.utc_today |> to_string
+    assert destination_charger.location.discovery_date |> to_string == Date.utc_today |> to_string
     if(Repo.one!(from t in LocationType,
     where: t.name == "destination_charger", select: count(t.id)) == 1) do
       assert destination_charger.location.type == "destination_charger"
