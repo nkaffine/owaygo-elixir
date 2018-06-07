@@ -192,7 +192,7 @@ defmodule Owaygo.Location.Address.TestCreate do
     end
 
     test "reject when street are no characters in the street" do
-      check_error(create() |> Map.put(:street, "192481249124"),
+      check_error(create() |> Map.put(:street, "1924812 49124"),
       %{street: ["has invalid format"]})
     end
 
