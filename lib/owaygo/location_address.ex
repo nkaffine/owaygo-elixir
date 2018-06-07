@@ -6,7 +6,7 @@ defmodule Owaygo.LocationAddress do
     field :street, :string
     field :city, :string
     field :state, :string
-    field :zip, :integer
+    field :zip, :string
     field :country, :string
     belongs_to :location, Owaygo.Location, foreign_key: :location_id, primary_key: true
   end
