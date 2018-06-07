@@ -7,7 +7,7 @@ defmodule Owaygo.Repo.Migrations.AddLocationAddressTable do
       add :street, :string
       add :city, :string
       add :state, :string
-      add :zip, :integer
+      add :zip, :string
       add :country, :string
     end
     create index(:location_address, [:location_id], unique: true, primary_key: true)
