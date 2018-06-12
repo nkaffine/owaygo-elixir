@@ -62,11 +62,40 @@ defmodule OwaygoWeb.Location.Supercharger.CreateTest do
     assert body["discovery_date"] == Date.utc_today |> to_string
     assert body["claimer_id"] == nil
     assert body["type"] == "supercharger"
-    assert body["street"] == @street
-    assert body["city"] == @city
-    assert body["state"] == @state
-    assert body["zip"] == @zip
-    assert body["country"] == @country
+    assert body["address"]["street"] == @street
+    assert body["address"]["city"] == @city
+    assert body["address"]["state"] == @state
+    assert body["address"]["zip"] == @zip
+    assert body["address"]["country"] == @country
+  end
+
+  test "given valid pararmeters without address returns valid response" do
+    user_id = create_user()
+    verify_email(user_id, @email)
+    create_type("supercharger")
+    create = %{name: @name, lat: @lat, lng: @lng, stalls: @stalls,
+    sc_info_id: @sc_info_id, status: @status, open_date: @open_date,
+    discoverer_id: user_id}
+    conn = build_conn() |> post("/api/v1/location/supercharger", create)
+    body = conn |> response(201) |> Poison.decode!
+    assert body["id"] |> is_integer
+    assert body["id"] > 0
+    assert body["name"] == @name
+    assert body["lat"] == @lat
+    assert body["lng"] == @lng
+    assert body["stalls"] == @stalls
+    assert body["sc_info_id"] == @sc_info_id
+    assert body["status"] == @status |> String.downcase
+    assert body["open_date"] == @open_date
+    assert body["discoverer_id"] == user_id
+    assert body["discovery_date"] == Date.utc_today |> to_string
+    assert body["claimer_id"] == nil
+    assert body["type"] == "supercharger"
+    assert body["address"]["street"] == nil
+    assert body["address"]["city"] == nil
+    assert body["address"]["state"] == nil
+    assert body["address"]["zip"] == nil
+    assert body["address"]["country"] == nil
   end
 
   test "throws error when given invalid paramters" do
