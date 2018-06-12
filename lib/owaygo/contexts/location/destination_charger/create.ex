@@ -99,7 +99,7 @@ defmodule Owaygo.Location.DestinationCharger.Create do
   defp insert_charger({location, address, changeset}) do
     if(changeset == nil) do
       case location do
-        {:ok, location} -> address
+        {:ok, _location} -> address
         {:error, changeset} -> {:error, changeset}
       end
     else
@@ -108,9 +108,11 @@ defmodule Owaygo.Location.DestinationCharger.Create do
         {:ok, destination_charger} ->
           {:ok, location} = location
           location = %{location | type: location.type |> convert_type}
-          if(address != nil) do
+          location = if(address != nil) do
             {:ok, address} = address
-            location = %{location | address: address}
+            %{location | address: address}
+          else
+            location
           end
           {:ok, %{destination_charger | location: location}}
       end
