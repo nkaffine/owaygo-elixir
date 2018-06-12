@@ -116,7 +116,7 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
       assert supercharger.location.type == "supercharger"
     end
     assert supercharger.location.discovery_date |> to_string == Date.utc_today |> to_string
-    if(create |> Map.has_key(:street)) do
+    if(create |> Map.has_key?(:street)) do
       assert supercharger.location.address.street == create.street
       assert supercharger.location.address.city == create.city
       assert supercharger.location.address.state == create.state
