@@ -8,7 +8,9 @@ defmodule OwaygoWeb.SuperchargerController do
     attrs = %{name: params["name"], lat: params["lat"], lng: params["lng"],
     stalls: params["stalls"], sc_info_id: params["sc_info_id"],
     status: params["status"], open_date: params["open_date"],
-    discoverer_id: params["discoverer_id"]}
+    discoverer_id: params["discoverer_id"], street: params["street"],
+    city: params["city"], state: params["state"], zip: params["zip"],
+    country: params["country"]}
     case Create.call(%{params: attrs}) do
       {:ok, supercharger} -> render_supercharger(conn, supercharger)
       {:error, changeset} -> Errors.render_error(conn, changeset)
@@ -23,7 +25,12 @@ defmodule OwaygoWeb.SuperchargerController do
     discoverer_id: supercharger.location.discoverer_id,
     claimer_id: supercharger.location.claimer_id,
     type: supercharger.location.type,
-    discovery_date: supercharger.location.discovery_date} |> Poison.encode
+    discovery_date: supercharger.location.discovery_date,
+    street: supercharger.location.address.street,
+    city: supercharger.location.address.city,
+    state: supercharger.location.address.state,
+    zip: supercharger.location.address.zip,
+    country: supercharger.location.address.country} |> Poison.encode
     conn |> resp(201, body)
   end
 end
