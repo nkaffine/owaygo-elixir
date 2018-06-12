@@ -5,6 +5,7 @@ defmodule Owaygo.Location.Supercharger.Create do
   alias Ecto.Changeset
   alias Owaygo.Supercharger
   alias Owaygo.LocationType
+  alias Owaygo.Location.Address
 
   @attributes [:location_id, :stalls, :sc_info_id, :status, :open_date]
   @required_attributes [:location_id]
@@ -13,6 +14,7 @@ defmodule Owaygo.Location.Supercharger.Create do
     case Repo.transaction fn ->
       params
       |> create_location
+      |> create_address
       |> build_changeset
       |> insert_supercharger
     end do
@@ -27,13 +29,49 @@ defmodule Owaygo.Location.Supercharger.Create do
     {Create.call(%{params: params |> Map.put(:type, "supercharger")}), params}
   end
 
-  #If the location was inserted succesfully it creates the changeset for the
-  #supercharger, otherwise it returns the tuple with the location Changeset
-  #and nil.
-  defp build_changeset({location, params}) do
+  #takes in the location tuple and the params. If the location tuple is
+  #{:error, location} then it will return the location tuple, nil for the
+  #address, and the params
+  #If the locaiton tuple is {:ok, location} it will try to insert the address
+  #and return the result of the attempt or nil if there were no address params
+  #passed
+  defp create_address({location, params}) do
     case location do
-      {:ok, location} -> {{:ok, location}, make_changeset(params |> Map.put(:location_id, location.id))}
-      {:error, changeset} -> {{:error, changeset}, nil}
+      {:error, location} -> {{:error, location}, nil, params}
+      {:ok, location} -> if params |> Map.has_key?(:street)
+        || params |> Map.has_key?(:city)
+        || params |> Map.has_key?(:state)
+        || params |> Map.has_key?(:zip) do
+        {{:ok, location}, Address.Create.call(%{params: params
+        |> Map.put(:location_id, location.id)}), params}
+      else
+        {{:ok, location}, nil, params}
+      end
+    end
+  end
+
+  #If the address is nil and the location was inserted correctly, it creates the
+  #changeset
+  #If the address is nil and creating the location returned an error, it returns
+  #location, address, and nil for the changeset
+  #If the address is not nil and the insert was successful, it creates the changeset
+  #If the address is not nil and the insert returned an error, it returns nil
+  #for the changeset
+  defp build_changeset({location, address, params}) do
+    if(address == nil) do
+      case location do
+        {:ok, location} -> {{:ok, location}, nil, make_changeset(params
+        |> Map.put(:location_id, location.id))}
+        {:error, location} -> {{:error, location}, nil, nil}
+      end
+    else
+      case address do
+        {:error, address} -> {location, {:error, address}, nil}
+        {:ok, address} ->
+          {:ok, location} = location
+          {{:ok, location}, {:ok, address},
+          make_changeset(params |> Map.put(:location_id, location.id))}
+      end
     end
   end
 
@@ -79,14 +117,30 @@ defmodule Owaygo.Location.Supercharger.Create do
   end
 
   #Inserts the supercharger into the database.
-  defp insert_supercharger({location, supercharger}) do
-    case location do
-      {:ok, location} -> case Repo.insert(supercharger) do
-        {:error, changeset} -> {:error, changeset}
-        {:ok, supercharger} -> {:ok, %{supercharger | location:
-        %{location | type: location.type |> convert_type}}}
+  defp insert_supercharger({location, address, supercharger}) do
+    if(address == nil) do
+      case location do
+        {:error, location} -> {:error, location}
+        {:ok, location} -> case Repo.insert(supercharger) do
+          {:error, changeset} -> {:error, changeset}
+          {:ok, supercharger} ->
+            {:ok, %{supercharger | location:
+            %{location | type: location.type |> convert_type}}}
+        end
       end
-      {:error, changeset} -> {:error, changeset}
+    else
+      case address do
+        {:error, address} -> {:error, address}
+        {:ok, address} ->
+          case Repo.insert(supercharger) do
+            {:error, changeset} -> {:error, changeset}
+            {:ok, supercharger} ->
+              {:ok, location} = location
+              location = %{location | address: address}
+              {:ok, %{supercharger | location:
+              %{location | type: location.type |> convert_type}}}
+          end
+      end
     end
   end
 
