@@ -22,6 +22,20 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
   @status "open"
   @open_date "2014-03-20"
 
+  @street "50 forsyth st."
+  @city "Boston"
+  @state "MA"
+  @zip "02115"
+  @country "United States"
+
+  @special_char_strings ["ajsdf`kasdfk", "ajsdfk@asdfk", "ajsdfk~asdfk",
+  "ajsdfk#asdfk", "ajsdfk$asdfk", "ajsdfk%asdfk", "ajsdfk^asdfk",
+  "ajsdfk&asdfk", "ajsdfk*asdfk", "ajsdfk(asdfk", "ajsdfk)asdfk",
+  "ajsdfk$asdfk", "ajsdfk+asdfk", "ajsdfk=asdfk", "ajsdfk\\asdfk",
+  "ajsdfk]asdfk", "ajsdfk[asdfk", "ajsdfk|asdfk", "ajsdfk}asdfk",
+  "ajsdfk{asdfk", "ajsdfk<asdfk", "ajsdfk>asdfk", "ajsdfk:asdfk",
+  "ajsdfk;asdfk", "ajsdfk'asdfk", "ajsdfk\"asdfk"]
+
   defp create_user() do
     create = %{username: @username, fname: @fname, lname: @lname, email: @email}
     assert {:ok, user} = User.Create.call(%{params: create})
@@ -43,7 +57,8 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
     create_type()
     create = %{name: @name, lat: @lat, lng: @lng, stalls: @stalls,
     sc_info_id: @sc_info_id, status: @status, open_date: @open_date,
-    discoverer_id: user_id}
+    discoverer_id: user_id, street: @street, city: @city, state: @state,
+    zip: @zip, country: @country}
     create
   end
 
@@ -52,7 +67,8 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
     create_type()
     create = %{name: @name, lat: @lat, lng: @lng, stalls: @stalls,
     sc_info_id: @sc_info_id, status: @status, open_date: @open_date,
-    discoverer_id: user_id}
+    discoverer_id: user_id, street: @street, city: @city, state: @state,
+    zip: @zip, country: @country}
     create
   end
 
@@ -61,7 +77,8 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
     verify_email(user_id, @email)
     create = %{name: @name, lat: @lat, lng: @lng, stalls: @stalls,
     sc_info_id: @sc_info_id, status: @status, open_date: @open_date,
-    discoverer_id: user_id}
+    discoverer_id: user_id, street: @street, city: @city, state: @state,
+    zip: @zip, country: @country}
     create
   end
 
@@ -99,6 +116,17 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
       assert supercharger.location.type == "supercharger"
     end
     assert supercharger.location.discovery_date |> to_string == Date.utc_today |> to_string
+    if(create |> Map.has_key(:street)) do
+      assert supercharger.location.address.street == create.street
+      assert supercharger.location.address.city == create.city
+      assert supercharger.location.address.state == create.state
+      assert supercharger.location.address.zip == create.zip
+      if(create |> Map.has_key?(:country)) do
+        assert supercharger.location.address.country == create.country
+      else
+        assert supercharger.location.address.country == nil
+      end
+    end
   end
 
   defp check_error(create, error) do
@@ -152,7 +180,39 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
       check_error(create() |> Map.delete(:lng),
       %{lng: ["can't be blank"]})
     end
-  end
+
+    test "accept when country is missing" do
+      check_success(create() |> Map.delete(:country))
+    end
+
+    test "accept when all address params are nil" do
+      check_success(create() |> Map.delete(:street)
+      |> Map.delete(:city)
+      |> Map.delete(:state)
+      |> Map.delete(:zip)
+      |> Map.delete(:country))
+    end
+
+    test "reject when street is missing" do
+      check_error(create() |> Map.delete(:street),
+      %{street: ["can't be blank"]})
+    end
+
+    test "reject when city is missing" do
+      check_error(create() |> Map.delete(:city),
+      %{city: ["can't be blank"]})
+    end
+
+    test "reject when state is missing" do
+      check_error(create() |> Map.delete(:state),
+      %{state: ["can't be blank"]})
+    end
+
+    test "reject when zip is missing" do
+      check_error(create() |> Map.delete(:zip),
+      %{zip: ["can't be blank"]})
+    end
+   end
 
   describe "test paramters for locaton specific part" do
     test "accept when user_exists and has verified their email" do
@@ -343,5 +403,236 @@ defmodule Owaygo.Location.Supercharger.TestCreate do
     end
   end
 
+  describe "check validity of street" do
+    test "accept when street has at least one numeral and other alphabetic characters" do
+      check_success(create() |> Map.put(:street, "1 jksdfkasdg"))
+    end
 
+    test "accept when street has at least one numeral, alphabetic characters and ." do
+      check_success(create() |> Map.put(:street, "1 asasdfjjasdgj.kasdgk."))
+    end
+
+    test "accept when street has at least one numeral, alphabetic characters and ," do
+      check_success(create() |> Map.put(:street, "1 jsdfkasdfk, asdfkakasdg, aksdg"))
+    end
+
+    test "accept when street has spaces" do
+      check_success(create() |> Map.put(:street, "a124sjdfjasdf jasdfj asdfj"))
+    end
+
+    test "accept when street has exactly 255 characters" do
+      check_success(create() |> Map.put(:street, "1 " <> String.duplicate("a", 253)))
+    end
+
+    test "accept when street has hyphenation" do
+      check_success(create() |> Map.put(:street, "123 asdfasdg-jasdgks"))
+    end
+
+    test "reject when street doesn't have spaces" do
+      check_error(create() |> Map.put(:street, "jasdkas124125dgjasdlkgjasdgk"),
+      %{street: ["has invalid format"]})
+    end
+
+    test "reject when street are no numerals in the street" do
+      check_error(create() |> Map.put(:street, "hasdkjasdgkjasd hasdfjg"),
+      %{street: ["has invalid format"]})
+    end
+
+    test "reject when street are no characters in the street" do
+      check_error(create() |> Map.put(:street, "1924812 49124"),
+      %{street: ["has invalid format"]})
+    end
+
+    test "reject when street contains an !" do
+      check_error(create() |> Map.put(:street, "123 sdfasdfjhj!"),
+      %{street: ["has invalid format"]})
+    end
+
+    test "reject when street cotains a ?" do
+      check_error(create() |> Map.put(:street, "123 jasdfkasdg ?"),
+      %{street: ["has invalid format"]})
+    end
+
+    test "reject when street contains _" do
+      check_error(create() |> Map.put(:street, "123 jasdfkjasdfk_asfjka"),
+      %{street: ["has invalid format"]})
+    end
+
+    test "reject special characters" do
+      create = create()
+      @special_char_strings |> Enum.each(fn(value) -> check_error(create
+      |> Map.put(:street, "1 " <> value), %{street: ["has invalid format"]})
+      end)
+    end
+
+    test "reject when street has more than 255 characters" do
+      check_error(create() |> Map.put(:street, "123 jasdfk" <> String.duplicate("a", 255)),
+      %{street: ["should be at most 255 characters"]})
+    end
+  end
+
+  describe "check validity of city" do
+    test "accept when city has only alphabetic characters" do
+      check_success(create() |> Map.put(:city, "jasfkaskasf"))
+    end
+
+    test "accept when city has spaces" do
+      check_success(create() |> Map.put(:city, "jasfj aslfjasf"))
+    end
+
+    test "reject when city has numerals" do
+      check_error(create() |> Map.put(:city, "jSDFk9100010"),
+      %{city: ["has invalid format"]})
+    end
+
+    test "reject when city has punctuation" do
+      create = create()
+      error = %{city: ["has invalid format"]}
+      check_error(create |> Map.put(:city, "jasdfkk!asgasg"), error)
+      check_error(create |> Map.put(:city, "jafkkasfj?lasfj"), error)
+      check_error(create |> Map.put(:city, "jasfk,kasfja"), error)
+      check_error(create |> Map.put(:city, "jasfkk.kasfhkas"), error)
+    end
+
+    test "reject when city has special characters" do
+      create = create()
+      @special_char_strings |> Enum.each(fn(value) -> check_error(create
+        |> Map.put(:city, value), %{city: ["has invalid format"]})
+      end)
+    end
+
+    test "reject when city has _" do
+      check_error(create() |> Map.put(:city, "jasfko_kasfkk"),
+      %{city: ["has invalid format"]})
+    end
+  end
+
+  describe "check validity of state" do
+    test "accept when state has only alphabetic characters" do
+      check_success(create() |> Map.put(:state, "jasfkaskasfjaj"))
+    end
+
+    test "accept when state has spaces" do
+      check_success(create() |> Map.put(:state, "jasfka kasfjfja"))
+    end
+
+    test "reject when state has numerals" do
+      check_error(create() |> Map.put(:state, "jasfk012040asfj"),
+      %{state: ["has invalid format"]})
+    end
+
+    test "reject when state has punctuation" do
+      create = create()
+      error = %{state: ["has invalid format"]}
+      check_error(create |> Map.put(:state, "jasfkkasfh!jfhasf"), error)
+      check_error(create |> Map.put(:state, "asfjkasfk?jasfkk"), error)
+      check_error(create |> Map.put(:state, "kasfk,kasfkk"), error)
+      check_error(create |> Map.put(:state, "jaskasf.lasfj"), error)
+    end
+
+    test "reject when state has special characters" do
+      create = create()
+      @special_char_strings |> Enum.each(fn(value) ->
+        check_error(create |> Map.put(:state, value), %{state: ["has invalid format"]})
+      end)
+    end
+
+    test "reject when state has _" do
+      check_error(create() |> Map.put(:state, "jasfkasf_kasfkks"),
+      %{state: ["has invalid format"]})
+    end
+  end
+
+  describe "check validity of zip" do
+    test "accept when zip has only 5 numerals" do
+      check_success(create() |> Map.put(:zip, "12341"))
+    end
+
+    test "reject when zip has less than 5 numerals" do
+      check_error(create() |> Map.put(:zip, "1234"),
+      %{zip: ["should be 5 characters"]})
+    end
+
+    test "reject when zip has more than 5 numerals" do
+      check_error(create() |> Map.put(:zip, "123456"),
+      %{zip: ["should be 5 characters"]})
+    end
+
+    test "reject when zip has alphabetic characters" do
+      check_error(create() |> Map.put(:zip, "123ab"),
+      %{zip: ["has invalid format"]})
+    end
+
+    test "reject whne zip has punctuation" do
+      check_error(create() |> Map.put(:zip, "123?1"),
+      %{zip: ["has invalid format"]})
+    end
+
+    test "reject when zip has special characters" do
+      create = create()
+      special_char_strings = ["f`kfk", "k@asd", "k~asd",
+      "k#asd", "k$asd", "k%asd", "k^asd",
+      "k&asd", "k*asd", "k(asd", "k)asd",
+      "k$asd", "k+asd", "k=asd", "k\\asd",
+      "k]asd", "k[asd", "k|asd", "k}asd",
+      "k{asd", "k<asd", "k>asd", "k:asd",
+      "k;asd", "k'asd", "k\"asd"]
+      special_char_strings |> Enum.each(fn(value) ->
+        check_error(create |> Map.put(:zip, value), %{zip: ["has invalid format"]})
+      end)
+    end
+
+    test "reject when zip has spaces" do
+      check_error(create() |> Map.put(:zip, "123 1"), %{zip: ["has invalid format"]})
+    end
+
+    test "reject when zip has _" do
+      check_error(create() |> Map.put(:zip, "123_1"), %{zip: ["has invalid format"]})
+    end
+
+    test "reject when zip is 00000" do
+      check_error(create() |> Map.put(:zip, "00000"), %{zip: ["has invalid format"]})
+    end
+
+    test "reject when zip is not string" do
+      check_error(create() |> Map.put(:zip, 12345), %{zip: ["is invalid"]})
+    end
+  end
+
+  describe "check validity of country" do
+    test "accept when country only has alphabetic characters" do
+      check_success(create() |> Map.put(:country, "jfjkasfkkiiq"))
+    end
+
+    test "accept when country has spaces" do
+      check_success(create() |> Map.put(:country, "jasfj kasfjka"))
+    end
+
+    test "reject when country has numerals" do
+      check_error(create() |> Map.put(:country, "jasdj1924ka"),
+      %{country: ["has invalid format"]})
+    end
+
+    test "reject when country has punctuation" do
+      create = create()
+      error = %{country: ["has invalid format"]}
+      check_error(create |> Map.put(:country, "jasfkk!kasfhkasfj"), error)
+      check_error(create |> Map.put(:country, "jasfkkasf?asfjhasf"), error)
+      check_error(create |> Map.put(:country, "jasfk.klasfjka"), error)
+      check_error(create |> Map.put(:country, "jhasfkjka,asfkka"), error)
+    end
+
+    test "reject when country has special characters" do
+      create = create()
+      @special_char_strings |> Enum.each(fn(value) ->
+        check_error(create |> Map.put(:country, value),
+        %{country: ["has invalid format"]})
+      end)
+    end
+
+    test "reject when country has _" do
+      check_error(create() |> Map.put(:country, "jasfkkasf_kasfhj"),
+      %{country: ["has invalid format"]})
+    end
+  end
 end
