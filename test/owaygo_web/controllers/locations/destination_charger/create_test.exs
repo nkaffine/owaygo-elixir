@@ -62,6 +62,31 @@ defmodule OwaygoWeb.Location.DestinationCharger.CreateTest do
     assert body["type"] == "destination_charger"
   end
 
+  test "given valid input without address return valid response" do
+    user_id = create_user()
+    verify_email(user_id, @email)
+    create_type()
+    create = %{name: @name, lat: @lat, lng: @lng, tesla_id: @tesla_id,
+    discoverer_id: user_id}
+    conn = build_conn() |> post("/api/v1/location/destination-charger", create)
+    body = conn |> response(201) |> Poison.decode!
+    assert body["id"] |> is_integer
+    assert body["id"] > 0
+    assert body["name"] == @name
+    assert body["lat"] == @lat
+    assert body["lng"] == @lng
+    assert body["address"]["street"] == nil
+    assert body["address"]["city"] == nil
+    assert body["address"]["state"] == nil
+    assert body["address"]["zip"] == nil
+    assert body["address"]["country"] == nil
+    assert body["tesla_id"] == @tesla_id
+    assert body["discoverer_id"] == user_id
+    assert body["discovery_date"] == Date.utc_today |> to_string
+    assert body["claimer_id"] == nil
+    assert body["type"] == "destination_charger"
+  end
+
   test "throws an error when given invalid input" do
     user_id = create_user()
     create_type()
