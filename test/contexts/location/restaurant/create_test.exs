@@ -322,7 +322,7 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
     end
 
     test "accept when phone just has numerals" do
-      check_success(create() |> Map.put(:phone_number, String.duplicate("0", 5)))
+      check_success(create() |> Map.put(:phone_number, String.duplicate("0", 10)))
     end
 
     test "accept when phone has numerals and -" do
@@ -330,7 +330,7 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
     end
 
     test "reject when phone has _" do
-      check_error(create() |> Map.put(:phone_number, "0_10124"),
+      check_error(create() |> Map.put(:phone_number, "0_10121241241244"),
       %{phone_number: ["has invalid format"]})
     end
 
@@ -361,6 +361,11 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
     test "reject when phone is not a string" do
       check_error(create() |> Map.put(:phone_number, 9012412),
       %{phone_number: ["is invalid"]})
+    end
+
+    test "reject when phone has less than 10 characters" do
+      check_error(create() |> Map.put(:phone_number, "123-1"),
+      %{phone_number: ["should have at least 10 characters"]})
     end
   end
 
