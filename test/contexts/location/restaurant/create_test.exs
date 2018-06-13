@@ -50,7 +50,7 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
 
   defp verify_email() do
     user_id = create_user()
-    assert {:ok, _email_verification} = VerifyEmail.call(%{id: user_id, email: @email})
+    assert {:ok, _email_verification} = VerifyEmail.call(%{params: %{id: user_id, email: @email}})
     user_id
   end
 
