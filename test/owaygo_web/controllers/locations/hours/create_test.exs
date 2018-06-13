@@ -50,7 +50,7 @@ defmodule OwaygoWeb.Location.Hours.CreateTest do
     assert body["location_id"] == create.location_id
     assert body["day"] == create.day
     assert body["hour"] == create.hour
-    assert body["opening"] == create.openning
+    assert body["opening"] == create.opening
   end
 
   test "given invalid input returns invalid output" do
