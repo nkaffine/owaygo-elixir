@@ -13,7 +13,8 @@ defmodule OwaygoWeb.MenuCategoryController do
   end
 
   defp render_category(conn, category) do
-    {:ok, body} = %{id: category.id, user_id: category.user_id} |> Poison.encode
+    {:ok, body} = %{id: category.id, name: category.name,
+    user_id: category.user_id} |> Poison.encode
     conn |> resp(201, body)
   end
 end
