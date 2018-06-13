@@ -26,7 +26,7 @@ defmodule OwaygoWeb.Location.Restaurant.Category.CreateTest do
   end
 
   test "throws error with invalid paramters" do
-    conn = build_conn() |> post("/api/v1/location/restuarant/menu/category",
+    conn = build_conn() |> post("/api/v1/location/restaurant/menu/category",
     %{name: @category_name})
     body = conn |> response(400) |> Poison.decode!
     assert body["name"] == ["can't be blank"]
