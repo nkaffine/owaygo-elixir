@@ -29,6 +29,6 @@ defmodule OwaygoWeb.Location.Restaurant.Category.CreateTest do
     conn = build_conn() |> post("/api/v1/location/restaurant/menu/category",
     %{name: @category_name})
     body = conn |> response(400) |> Poison.decode!
-    assert body["name"] == ["can't be blank"]
+    assert body["user_id"] == ["can't be blank"]
   end
 end
