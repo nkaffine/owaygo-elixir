@@ -80,7 +80,7 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
 
   defp check_success(create) do
     assert {:ok, restuarant} = Create.call(%{params: create})
-    assert restuarant.id > 0
+    assert restuarant.location_id > 0
     assert restuarant.location.name == create.name
     assert restuarant.location.lat == create.lat
     assert restuarant.location.lng == create.lng
