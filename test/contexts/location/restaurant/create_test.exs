@@ -3,6 +3,8 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
   alias Owaygo.User
   alias Owaygo.Test.VerifyEmail
   alias Owaygo.Location.Restuarant.Create
+  alias Owaygo.LocationType
+  alias Owaygo.Location.Type
 
   @username "nkaffine"
   @fname "Nick"
@@ -54,7 +56,12 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
     user_id
   end
 
+  defp create_type() do
+    assert {:ok, _type} = Type.Create.call(%{params: %{name: "restaurant"}})
+  end
+
   defp create() do
+    create_type()
     user_id = verify_email()
     %{name: @name, lat: @lat, lng: @lng, facebook: @facebook, twitter: @twitter,
     instagram: @instagram, website: @website, phone_number: @phone_number,
@@ -63,7 +70,16 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
   end
 
   defp create_without_verification() do
+    create_type()
     user_id = create_user()
+    %{name: @name, lat: @lat, lng: @lng, facebook: @facebook, twitter: @twitter,
+    instagram: @instagram, website: @website, phone_number: @phone_number,
+    email: @email, street: @street, city: @city, state: @state, zip: @zip,
+    country: @country, discoverer_id: user_id}
+  end
+
+  defp create_without_type() do
+    user_id = verify_email()
     %{name: @name, lat: @lat, lng: @lng, facebook: @facebook, twitter: @twitter,
     instagram: @instagram, website: @website, phone_number: @phone_number,
     email: @email, street: @street, city: @city, state: @state, zip: @zip,
@@ -84,23 +100,23 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
     assert restuarant.location.name == create.name
     assert restuarant.location.lat == create.lat
     assert restuarant.location.lng == create.lng
-    assert restuarant.facebook == create.facebook
-    assert restuarant.twitter == create.twitter
-    assert restuarant.instagram == create.instagram
-    assert restuarant.website == create.website
-    assert restuarant.phone_number == create.phone_number
-    assert restuarant.email == create.email
-    check_if_exists(:street, restuarant, create)
-    check_if_exists(:city, restuarant, create)
-    check_if_exists(:state, restuarant, create)
-    check_if_exists(:zip, restuarant, create)
-    check_if_exists(:country, restuarant, create)
-    assert restuarant.location.discoverer_id == create.user_id
+    check_if_exists(:website, restuarant, create)
+    check_if_exists(:facebook, restuarant, create)
+    check_if_exists(:twitter, restuarant, create)
+    check_if_exists(:instagram, restuarant, create)
+    check_if_exists(:phone_number, restuarant, create)
+    check_if_exists(:email, restuarant, create)
+    check_if_exists(:street, restuarant.location.address, create)
+    check_if_exists(:city, restuarant.location.address, create)
+    check_if_exists(:state, restuarant.location.address, create)
+    check_if_exists(:zip, restuarant.location.address, create)
+    check_if_exists(:country, restuarant.location.address, create)
+    assert restuarant.location.discoverer_id == create.discoverer_id
     assert restuarant.location.claimer_id == nil
     assert restuarant.location.discovery_date |> to_string == Date.utc_today |> to_string
     if(Repo.one!(from t in LocationType,
-    where: t.name == "restuarant", select: count(t.id)) == 1) do
-      assert restuarant.location.type == "restuarant"
+    where: t.name == "restaurant", select: count(t.id)) == 1) do
+      assert restuarant.location.type == "restaurant"
     else
       assert restuarant.location.type == nil
     end
@@ -189,6 +205,10 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
     test "reject when missing zip" do
       check_error(create() |> Map.delete(:zip),
       %{zip: ["can't be blank"]})
+    end
+
+    test "accept when the type has not been created" do
+      check_success(create_without_type())
     end
   end
 

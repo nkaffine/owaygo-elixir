@@ -36,8 +36,14 @@ defmodule OwaygoWeb.Location.Restuarant.CreateTest do
     _body = conn |> response(201) |> Poison.decode!
   end
 
+  defp create_type() do
+    conn = build_conn() |> post("/api/v1/admin/location/type", %{name: "restaurant"})
+    _body = conn |> response(201) |> Poison.decode!
+  end
+
   defp create() do
     user_id = create_user()
+    create_type()
     verify_email(user_id, @email)
     %{name: @name, lat: @lat, lng: @lng, facebook: @facebook, twitter: @twitter,
     instagram: @instagram, website: @website, phone_number: @phone_number,
@@ -65,10 +71,37 @@ defmodule OwaygoWeb.Location.Restuarant.CreateTest do
     assert body["website"] == @website
     assert body["phone_number"] == @phone_number
     assert body["email"] == @email
-    assert body["discoverer_id"] == create.user_id
+    assert body["discoverer_id"] == create.discoverer_id
     assert body["discovery_date"] == Date.utc_today |> to_string
     assert body["claimer_id"] == nil
-    assert body["type"] == "destination_charger"
+    assert body["type"] == "restaurant"
+  end
+
+  test "given valid input with no address, return valid output" do
+    create = create() |> Map.delete(:street) |> Map.delete(:city)
+    |> Map.delete(:state) |> Map.delete(:zip) |> Map.delete(:country)
+    conn = build_conn() |> post("/api/v1/location/restuarant", create)
+    body = conn |> response(201) |> Poison.decode!
+    assert body["id"] |> is_integer
+    assert body["id"] > 0
+    assert body["name"] == @name
+    assert body["lat"] == @lat
+    assert body["lng"] == @lng
+    assert body["address"]["street"] == nil
+    assert body["address"]["city"] == nil
+    assert body["address"]["state"] == nil
+    assert body["address"]["zip"] == nil
+    assert body["address"]["country"] == nil
+    assert body["facebook"] == @facebook
+    assert body["twitter"] == @twitter
+    assert body["instagram"] == @instagram
+    assert body["website"] == @website
+    assert body["phone_number"] == @phone_number
+    assert body["email"] == @email
+    assert body["discoverer_id"] == create.discoverer_id
+    assert body["discovery_date"] == Date.utc_today |> to_string
+    assert body["claimer_id"] == nil
+    assert body["type"] == "restaurant"
   end
 
   test "throw error when given invalid output" do
