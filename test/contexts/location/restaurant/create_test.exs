@@ -199,7 +199,7 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
 
     test "reject when name is more than 255 characters" do
       check_error(create() |> Map.put(:name, String.duplicate("a", 256)),
-      %{name: ["should be at most 255 characters"]})
+      %{name: ["invalid length"]})
     end
   end
 
@@ -326,7 +326,7 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
     end
 
     test "accept when phone has numerals and -" do
-      check_success(create() |> Map.put(:phone_number, String.duplicate("0-", 50)))
+      check_success(create() |> Map.put(:phone_number, String.duplicate("0-", 25)))
     end
 
     test "reject when phone has _" do
@@ -365,7 +365,7 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
 
     test "reject when phone has less than 10 characters" do
       check_error(create() |> Map.put(:phone_number, "123-1"),
-      %{phone_number: ["should have at least 10 characters"]})
+      %{phone_number: ["should be at least 10 characters"]})
     end
   end
 
@@ -376,11 +376,11 @@ defmodule Owaygo.Location.Restuarant.CreateTest do
 
     test "reject when email is less than 5 characters" do
       check_error(create() |> Map.put(:email, "@."),
-      %{email: ["must be at least 5 characters"]})
+      %{email: ["should be at least 5 characters"]})
     end
 
     test "accept when email is 255 characters" do
-      check_success(create() |> Map.put(:email, String.duplicate("a@a.a", 250)))
+      check_success(create() |> Map.put(:email, String.duplicate("a@a.a", 51)))
     end
 
     test "reject when email is more than 255 characters" do
