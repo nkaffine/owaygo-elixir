@@ -56,7 +56,11 @@ defmodule OwaygoWeb.Location.Hours.CreateTest do
   test "given invalid input returns invalid output" do
     create = create() |> Map.delete(:location_id)
     conn = build_conn() |> post("/api/v1/location/hours", create)
-    body = conn |> response(201) |> Poison.decode!
+    body = conn |> response(400) |> Poison.decode!
     assert body["location_id"] == ["can't be blank"]
+    assert body["day"] == nil
+    assert body["id"] == nil
+    assert body["hour"] == nil
+    assert body["opening"] == nil
   end
 end
