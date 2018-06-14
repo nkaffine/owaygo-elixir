@@ -42,7 +42,7 @@ defmodule OwaygoWeb.Location.Restaurant.FoodItem.CreateTest do
 
   defp create_category(category, user_id) do
     create = %{name: category, user_id: user_id}
-    conn = build_conn() |> post("/api/v1/location/menu/category", create)
+    conn = build_conn() |> post("/api/v1/location/restaurant/menu/category", create)
     _body = conn |> response(201) |> Poison.decode!
   end
 
