@@ -40,7 +40,7 @@ defmodule Owaygo.Location.Hours.CreateTest do
     assert {:ok, hour} = Create.call(%{params: create})
     assert hour.id > 0
     assert hour.location_id == create.location_id
-    assert hour.day == create.day
+    assert hour.day == create.day |> String.downcase
     assert hour.hour == create.hour
     assert hour.opening == create.opening
   end
