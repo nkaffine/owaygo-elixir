@@ -87,7 +87,7 @@ defmodule Owaygo.Location.Hours.CreateTest do
     end
 
     test "reject when location_id is not an integer" do
-      check_error(create |> Map.put(:location_id, "ahasjkasf"),
+      check_error(create() |> Map.put(:location_id, "ahasjkasf"),
       %{location_id: ["is invalid"]})
     end
   end
