@@ -7,7 +7,7 @@ defmodule OwaygoWeb.FoodItemController do
   def create(conn, params) do
     attrs = %{name: params["name"], description: params["description"],
     price: params["price"], user_id: params["user_id"],
-    location_id: ["location_id"]}
+    location_id: params["location_id"], category: params["category"]}
     case Create.call(%{params: attrs}) do
       {:ok, food_item} -> render_food_item(conn, food_item)
       {:error, changeset} -> Errors.render_error(conn, changeset)
@@ -18,7 +18,8 @@ defmodule OwaygoWeb.FoodItemController do
     {:ok, body} = %{id: food_item.id, name: food_item.name,
     description: food_item.description, price: food_item.price,
     user_id: food_item.user_id, location_id: food_item.location_id,
-    inserted_at: food_item.inserted_at, updated_at: food_item.updated_at}
+    inserted_at: food_item.inserted_at, updated_at: food_item.updated_at,
+    category: food_item.category} |> Poison.encode
     conn |> resp(201, body)
   end
 
