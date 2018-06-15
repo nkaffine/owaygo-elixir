@@ -1,6 +1,8 @@
 defmodule OwaygoWeb.Location.Restaurant.FoodItem.CreateTest do
   use OwaygoWeb.ConnCase
 
+  alias Ecto.DateTime
+
   @username "nkaffine"
   @fname "Nick"
   @lname "Kaffine"
@@ -66,8 +68,10 @@ defmodule OwaygoWeb.Location.Restaurant.FoodItem.CreateTest do
     assert body["description"] == create.description
     assert body["price"] == create.price
     assert body["category"] == create.category
-    assert body["inserted_at"] == Date.utc_today() |> to_string
-    assert body["updated_at"] == Date.utc_today() |> to_string
+    assert body["inserted_at"] |> DateTime.cast! |> DateTime.to_date |> to_string
+    == Date.utc_today() |> to_string
+    assert body["updated_at"] |> DateTime.cast! |> DateTime.to_date |> to_string
+    == Date.utc_today() |> to_string
   end
 
   test "given valid parameters without optional parameters returns valid response" do
@@ -83,14 +87,16 @@ defmodule OwaygoWeb.Location.Restaurant.FoodItem.CreateTest do
     assert body["description"] == nil
     assert body["price"] == nil
     assert body["category"] == nil
-    assert body["inserted_at"] == Date.utc_today() |> to_string
-    assert body["updated_at"] == Date.utc_today() |> to_string
+    assert body["inserted_at"] |> DateTime.cast! |> DateTime.to_date |> to_string
+    == Date.utc_today() |> to_string
+    assert body["updated_at"]  |> DateTime.cast! |> DateTime.to_date |> to_string
+    == Date.utc_today() |> to_string
   end
 
   test "throws an error when given invalid parameters" do
     create = create() |> Map.delete(:name)
     conn = build_conn() |> post("/api/v1/location/restaurant/food-item", create)
-    body = conn |> response(201) |> Poison.decode!
+    body = conn |> response(400) |> Poison.decode!
     assert body["name"] == ["can't be blank"]
     assert body["id"] == nil
     assert body["location_id"] == nil
