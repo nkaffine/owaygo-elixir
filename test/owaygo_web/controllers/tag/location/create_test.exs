@@ -52,23 +52,23 @@ defmodule OwaygoWeb.Location.CreateTest do
     create = create()
     conn = build_conn() |> post("/api/v1/tag/location", create)
     body = conn |> response(201) |> Poison.decode!
-    body["location_id"] == create.location_id
-    body["tag_id"] == create.tag_id
-    body["average_rating"] == nil
-    body["inserted_at"] |> DateTime.cast! |> DateTime.to_date |> to_string
+    assert body["location_id"] == create.location_id
+    assert body["tag_id"] == create.tag_id
+    assert body["average_rating"] == nil
+    assert body["inserted_at"] |> DateTime.cast! |> DateTime.to_date |> to_string
     == Date.utc_today() |> to_string
-    body["updated_at"] |> DateTime.cast! |> DateTime.to_date |> to_string
+    assert body["updated_at"] |> DateTime.cast! |> DateTime.to_date |> to_string
     == Date.utc_today() |> to_string
   end
 
   test "throws error when given invalid paramters" do
     conn = build_conn() |> post("/api/v1/tag/location", create() |> Map.delete(:location_id))
     body = conn |> response(400) |> Poison.decode!
-    body["location_id"] == ["can't be blank"]
-    body["tag_id"] == nil
-    body["average_rating"] == nil
-    body["inserted_at"] == nil
-    body["updated_at"] == nil
+    assert body["location_id"] == ["can't be blank"]
+    assert body["tag_id"] == nil
+    assert body["average_rating"] == nil
+    assert body["inserted_at"] == nil
+    assert body["updated_at"] == nil
   end
 
 end
