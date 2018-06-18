@@ -6,6 +6,7 @@ defmodule OwaygoWeb.Location.CreateTest do
   alias Owaygo.Test.VerifyEmail
   alias Owaygo.Tag
   alias Ecto.DateTime
+  alias Owaygo.Support.UserTest
 
   @username "nkaffine"
   @fname "Nick"
@@ -20,8 +21,7 @@ defmodule OwaygoWeb.Location.CreateTest do
 
   defp create_user() do
     create = %{username: @username, fname: @fname, lname: @lname, email: @email}
-    assert {:ok, user} = User.Create.call(%{params: create})
-    user.id
+    UserTest.create(create)
   end
 
   defp verify_email(user_id, email) do
