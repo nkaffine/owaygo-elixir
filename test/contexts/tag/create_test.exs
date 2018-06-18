@@ -2,6 +2,7 @@ defmodule Owaygo.Tag.CreateTest do
   use Owaygo.DataCase
   alias Owaygo.Tag.Create
   alias Owaygo.User
+  alias Ecto.DateTime
 
   @username "nkaffine"
   @fname "Nick"
@@ -101,6 +102,21 @@ defmodule Owaygo.Tag.CreateTest do
 
     test "reject when tag name is not a string" do
       check_error(create() |> Map.put(:name, 12412), %{name: ["is invalid"]})
+    end
+
+    test "accept and return the previous id when the name already exists" do
+      create = create()
+      attrs = %{username: "kaffine.n", fname: "Nick", lname: "Kaffine",
+      email: "411rockstar@gmail.com"}
+      assert {:ok, user} = User.Create.call(%{params: attrs})
+      assert {:ok, tag1} = Create.call(%{params: create})
+      assert {:ok, tag2} = Create.call(%{params: create |> Map.put(:user_id, user.id)})
+      assert tag1.id > 0
+      assert tag1.name == create.name
+      assert tag1.user_id == create.user_id
+      assert tag1.inserted_at |> DateTime.cast! |> DateTime.to_date
+      |> to_string == Date.utc_today |> to_string
+      assert tag1 == tag2
     end
   end
 
