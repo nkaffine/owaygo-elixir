@@ -44,7 +44,4 @@ defmodule OwaygoWeb.Tag.TestCreate do
   test "throw an error when given invalid parameters" do
     check_error(create() |> Map.delete(:name), ["can't be blank"], "name")
   end
-
-
-
 end
