@@ -1,5 +1,6 @@
 defmodule OwaygoWeb.Tag.TestCreate do
   use OwaygoWeb.ConnCase
+  alias Ecto.DateTime
 
   @username "nkaffine"
   @fname "Nick"
