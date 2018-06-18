@@ -24,6 +24,7 @@ defmodule OwaygoWeb.Router do
     resources "/location/hours", LocationHoursContoller, only: [:create]
     resources "/location/restaurant/food-item", FoodItemController, only: [:create]
     resources "/tag", Tag.TagController, only: [:create]
+    resources "/tag/location", Tag.Location.Controller, only: [:create]
   end
 
   scope "/api/v1/admin", OwaygoWeb do
