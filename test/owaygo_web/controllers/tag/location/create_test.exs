@@ -5,6 +5,7 @@ defmodule OwaygoWeb.Location.CreateTest do
   alias Owaygo.Location
   alias Owaygo.Test.VerifyEmail
   alias Owaygo.Tag
+  alias Ecto.DateTime
 
   @username "nkaffine"
   @fname "Nick"
@@ -59,6 +60,16 @@ defmodule OwaygoWeb.Location.CreateTest do
     == Date.utc_today() |> to_string
     assert body["updated_at"] |> DateTime.cast! |> DateTime.to_date |> to_string
     == Date.utc_today() |> to_string
+    assert body["location_tag"] == nil
+  end
+
+  test "throws an error when the tag already exists" do
+    create = create()
+    conn = build_conn() |> post("/api/v1/tag/location", create)
+    _body = conn |> response(201) |> Poison.decode!
+    conn = build_conn() |> post("/api/v1/tag/location", create)
+    body = conn |> response(400) |> Poison.decode!
+    assert body["location_tag"] == ["has already been taken"]
   end
 
   test "throws error when given invalid paramters" do
@@ -69,6 +80,7 @@ defmodule OwaygoWeb.Location.CreateTest do
     assert body["average_rating"] == nil
     assert body["inserted_at"] == nil
     assert body["updated_at"] == nil
+    assert body["location_tag"] == nil
   end
 
 end
