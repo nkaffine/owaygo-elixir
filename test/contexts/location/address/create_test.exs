@@ -1,15 +1,8 @@
 defmodule Owaygo.Location.Address.TestCreate do
   use Owaygo.DataCase
 
-  alias Owaygo.User
-  alias Owaygo.Location
-  alias Owaygo.Test.VerifyEmail
   alias Owaygo.Location.Address.Create
-
-  @username "nkaffine"
-  @fname "Nick"
-  @lname "kaffine"
-  @email "nicholas.kaffine@gmail.com"
+  alias Owaygo.Support
 
   @name "Chicken Lou's"
   @lat 56.012912
@@ -29,28 +22,30 @@ defmodule Owaygo.Location.Address.TestCreate do
   "ajsdfk{asdfk", "ajsdfk<asdfk", "ajsdfk>asdfk", "ajsdfk:asdfk",
   "ajsdfk;asdfk", "ajsdfk'asdfk", "ajsdfk\"asdfk"]
 
-  defp create_user() do
-    create = %{username: @username, fname: @fname, lname: @lname, email: @email}
-    assert {:ok, user} = User.Create.call(%{params: create})
-    user.id
-  end
+  # defp create_user() do
+  #   create = %{username: @username, fname: @fname, lname: @lname, email: @email}
+  #   assert {:ok, user} = User.Create.call(%{params: create})
+  #   user.id
+  # end
 
+  # defp create_location() do
+  #   user_id = create_user()
+  #   verify_email(user_id, @email)
+  #   create = %{name: @name, lat: @lat, lng: @lng, discoverer_id: user_id}
+  #   assert {:ok, location} = Location.Create.call(%{params: create})
+  #   location.id
+  # end
+
+  #creates the location
   defp create_location() do
-    user_id = create_user()
-    verify_email(user_id, @email)
-    create = %{name: @name, lat: @lat, lng: @lng, discoverer_id: user_id}
-    assert {:ok, location} = Location.Create.call(%{params: create})
-    location.id
-  end
-
-  defp verify_email(user_id, email) do
-    create = %{id: user_id, email: email}
-    assert {:ok, _email_verification} = VerifyEmail.call(%{params: create})
+    location_param_map = %{name: @name, lat: @lat, lng: @lng}
+    assert {:ok, user, location} = Support.create_location(location_param_map)
+    {user, location}
   end
 
   defp create() do
-    location_id = create_location()
-    %{location_id: location_id, street: @street, city: @city,
+    {_user, location} = create_location()
+    %{location_id: location.id, street: @street, city: @city,
     state: @state, zip: @zip, country: @country}
   end
 
