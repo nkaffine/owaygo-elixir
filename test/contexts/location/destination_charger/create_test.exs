@@ -1,10 +1,8 @@
 defmodule Owaygo.Location.DestinationCharger.CreateTest do
   use Owaygo.DataCase
   alias Owaygo.Location.DestinationCharger.Create
-  alias Owaygo.User
-  alias Owaygo.Test.VerifyEmail
-  alias Owaygo.Location.Type
   alias Owaygo.LocationType
+  alias Owaygo.Support
 
   @username "nkaffine"
   @fname "nick"
@@ -31,36 +29,26 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
   "ajsdfk{asdfk", "ajsdfk<asdfk", "ajsdfk>asdfk", "ajsdfk:asdfk",
   "ajsdfk;asdfk", "ajsdfk'asdfk", "ajsdfk\"asdfk"]
 
-  defp create_user() do
-    create = %{username: @username, fname: @fname, lname: @lname, email: @email}
-    assert {:ok, user} = User.Create.call(%{params: create})
-    user.id
-  end
-
-  defp verify_email(user_id, email) do
-    attrs = %{id: user_id, email: email}
-    assert {:ok, _email_verification} = VerifyEmail.call(%{params: attrs})
-  end
-
   defp create_type() do
-    assert {:ok, _type} = Type.Create.call(%{params: %{name: "destination_charger"}})
+    assert {:ok, _type} = Support.create_location_type("destination_charger")
   end
 
   defp create() do
-    user_id = create_user()
-    verify_email(user_id, @email)
+    assert {:ok, user} = Support.create_user_verified_email(
+    %{username: @username, fname: @fname, lname: @lname, email: @email})
     create_type()
     %{name: @name, lat: @lat, lng: @lng, street: @street, city: @city,
     state: @state, zip: @zip, country: @country, tesla_id: @tesla_id,
-    discoverer_id: user_id}
+    discoverer_id: user.id}
   end
 
   defp create_without_email_verification() do
-    user_id = create_user()
+    assert {:ok, user} = Support.create_user(
+    %{username: @username, fname: @fname, lname: @lname, email: @email})
     create_type()
     %{name: @name, lat: @lat, lng: @lng, street: @street, city: @city,
     state: @state, zip: @zip, country: @country, tesla_id: @tesla_id,
-    discoverer_id: user_id}
+    discoverer_id: user.id}
   end
 
   defp check_if_exists(key, destination_charger, create) do
