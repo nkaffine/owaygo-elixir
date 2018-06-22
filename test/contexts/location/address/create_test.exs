@@ -22,20 +22,6 @@ defmodule Owaygo.Location.Address.TestCreate do
   "ajsdfk{asdfk", "ajsdfk<asdfk", "ajsdfk>asdfk", "ajsdfk:asdfk",
   "ajsdfk;asdfk", "ajsdfk'asdfk", "ajsdfk\"asdfk"]
 
-  # defp create_user() do
-  #   create = %{username: @username, fname: @fname, lname: @lname, email: @email}
-  #   assert {:ok, user} = User.Create.call(%{params: create})
-  #   user.id
-  # end
-
-  # defp create_location() do
-  #   user_id = create_user()
-  #   verify_email(user_id, @email)
-  #   create = %{name: @name, lat: @lat, lng: @lng, discoverer_id: user_id}
-  #   assert {:ok, location} = Location.Create.call(%{params: create})
-  #   location.id
-  # end
-
   #creates the location
   defp create_location() do
     location_param_map = %{name: @name, lat: @lat, lng: @lng}
