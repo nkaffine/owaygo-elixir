@@ -187,7 +187,7 @@ defmodule Owaygo.Support do
   """
   def create_location_with_user(user) do
     Location.Create.call(%{params: location_param_map()
-    |> Map.put(:discoverer_id: user.id)})
+    |> Map.put(:discoverer_id, user.id)})
   end
 
   # Creates a location with the given parameters. Returns either {:ok, location}
@@ -291,5 +291,20 @@ defmodule Owaygo.Support do
   """
   def create_tag(tag_name) do
     create_tag(user_param_map(), tag_name)
+  end
+
+  @doc """
+  Returns the string with the current date
+  """
+  def today() do
+    Date.utc_today() |> to_string()
+  end
+
+  @doc """
+  Converts the datetime from the database to the date string for the date it
+  was inserted
+  """
+  def ecto_datetime_to_date_string(datetime) do
+    datetime |> DateTime.cast! |> DateTime.to_date |> to_string
   end
 end
