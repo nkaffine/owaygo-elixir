@@ -12,17 +12,18 @@ defmodule Owaygo.Tag.FoodItem.CreateTest do
     tag = map.tag
     assert {:ok, _email_verification} = Support.verify_email(user)
     assert {:ok, location} = Support.create_location_with_user(user)
-    %{user: user, tag: tag, location: location}
+    assert {:ok, food_item} = Support.create_food_item_with_user_and_location(user, location)
+    %{user: user, tag: tag, location: location, food_item: food_item}
   end
 
   defp create() do
     map = setup()
-    %{location_id: map.location.id, tag_id: map.tag.id}
+    %{food_item_id: map.food_item.id, tag_id: map.tag.id}
   end
 
   defp check_success(create) do
     assert {:ok, tag} = Create.call(%{params: create})
-    assert tag.location_id == create.location_id
+    assert tag.food_item_id == create.food_item_id
     assert tag.tag_id == create.tag_id
     assert tag.inserted_at |> Support.ecto_datetime_to_date_string == Support.today()
     assert tag.updated_at |> Support.ecto_datetime_to_date_string == Support.today()
@@ -39,9 +40,9 @@ defmodule Owaygo.Tag.FoodItem.CreateTest do
   end
 
   describe "missing parameters" do
-    test "reject when mission location_id" do
-      check_error(create() |> Map.delete(:location_id),
-      %{location_id: ["can't be blank"]})
+    test "reject when mission food_item_id" do
+      check_error(create() |> Map.delete(:food_item_id),
+      %{food_item_id: ["can't be blank"]})
     end
 
     test "reject when missing tag_id" do
@@ -50,16 +51,16 @@ defmodule Owaygo.Tag.FoodItem.CreateTest do
     end
   end
 
-  describe "validity of location_id" do
-    test "reject when location_id doesn't exist" do
+  describe "validity of food_item_id" do
+    test "reject when food_item_id doesn't exist" do
       create = create()
-      check_error(create |> Map.put(:location_id, create.location_id + 1),
-      %{location_id: ["does not exist"]})
+      check_error(create |> Map.put(:food_item_id, create.food_item_id + 1),
+      %{food_item_id: ["does not exist"]})
     end
 
-    test "reject when location_id isn't an int" do
-      check_error(create() |> Map.put(:location_id, "jasfjjasg"),
-      %{location_id: ["is invalid"]})
+    test "reject when food_item_id isn't an int" do
+      check_error(create() |> Map.put(:food_item_id, "jasfjjasg"),
+      %{food_item_id: ["is invalid"]})
     end
   end
 
