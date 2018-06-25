@@ -31,8 +31,10 @@ defmodule Owaygo.Support do
   "{", "<", ">", ":",
   ";", "\""]
 
-  #Creates the param map for the default user in testing
-  defp user_param_map() do
+  @doc """
+  Creates the param map for the default user in testing
+  """
+  def user_param_map() do
     %{username: @username, fname: @fname, lname: @lname,
     email: @email, gender: @gender, birthday: @birthday, lat: @user_lat,
     lng: @user_lng}
@@ -121,8 +123,10 @@ defmodule Owaygo.Support do
     VerifyEmail.call(%{params: %{id: user.id, email: user.email}})
   end
 
-  #Creates the location param map for the default test location
-  defp location_param_map() do
+  @doc """
+  Creates the location param map for the default test location
+  """
+  def location_param_map() do
     %{name: @name, lat: @lat, lng: @lng}
   end
 
