@@ -4,29 +4,16 @@ defmodule Owaygo.Location.Address.TestCreate do
   alias Owaygo.Location.Address.Create
   alias Owaygo.Support
 
-  @name "Chicken Lou's"
-  @lat 56.012912
-  @lng 97.124512
-
   @street "50 forsyth st."
   @city "Boston"
   @state "MA"
   @zip "02115"
   @country "United States"
 
-  @special_char_strings ["ajsdf`kasdfk", "ajsdfk@asdfk", "ajsdfk~asdfk",
-  "ajsdfk#asdfk", "ajsdfk$asdfk", "ajsdfk%asdfk", "ajsdfk^asdfk",
-  "ajsdfk&asdfk", "ajsdfk*asdfk", "ajsdfk(asdfk", "ajsdfk)asdfk",
-  "ajsdfk$asdfk", "ajsdfk+asdfk", "ajsdfk=asdfk", "ajsdfk\\asdfk",
-  "ajsdfk]asdfk", "ajsdfk[asdfk", "ajsdfk|asdfk", "ajsdfk}asdfk",
-  "ajsdfk{asdfk", "ajsdfk<asdfk", "ajsdfk>asdfk", "ajsdfk:asdfk",
-  "ajsdfk;asdfk", "ajsdfk'asdfk", "ajsdfk\"asdfk"]
-
   #creates the location
   defp create_location() do
-    location_param_map = %{name: @name, lat: @lat, lng: @lng}
-    assert {:ok, user, location} = Support.create_location(location_param_map)
-    {user, location}
+    assert {:ok, map} = Support.create_location()
+    {map.user, map.location}
   end
 
   defp create() do
@@ -189,32 +176,10 @@ defmodule Owaygo.Location.Address.TestCreate do
 
     test "reject special characters" do
       create = create()
-      check_error(create |> Map.put(:street, "123 ajsdf`kasdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk@asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk~asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk#asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk$asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk%asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk^asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk&asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk*asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk(asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk)asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk$asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk+asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk=asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk\\asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk]asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk[asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk|asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk}asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk{asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk<asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk>asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk:asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk;asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk'asdfk"), %{street: ["has invalid format"]})
-      check_error(create |> Map.put(:street, "123 ajsdfk\"asdfk"), %{street: ["has invalid format"]})
+      Support.rejected_special_chars("ajsdf", "kasdfk", [])
+      |> Enum.map(fn(value) ->
+        check_error(create |> Map.put(:street, value), %{street: ["has invalid format"]})
+      end)
     end
 
     test "reject when street has more than 255 characters" do
@@ -251,7 +216,8 @@ defmodule Owaygo.Location.Address.TestCreate do
 
     test "reject when city has special characters" do
       create = create()
-      @special_char_strings |> Enum.each(fn(value) -> value |> check_invalid_value(create, :city,
+      Support.rejected_special_chars("ajsdf", "kasdfk", [])
+      |> Enum.each(fn(value) -> value |> check_invalid_value(create, :city,
       %{city: ["has invalid format"]}) end)
     end
 
@@ -286,7 +252,8 @@ defmodule Owaygo.Location.Address.TestCreate do
 
     test "reject when state has special characters" do
       create = create()
-      @special_char_strings |> Enum.each(fn(value) -> value |> check_invalid_value(create, :state,
+      Support.accept_special_chars("ajsdf", "kasdfk", [])
+      |> Enum.each(fn(value) -> value |> check_invalid_value(create, :state,
       %{state: ["has invalid format"]}) end)
     end
 
@@ -326,14 +293,8 @@ defmodule Owaygo.Location.Address.TestCreate do
 
     test "reject when zip has special characters" do
       create = create()
-      special_char_strings = ["f`kfk", "k@asd", "k~asd",
-      "k#asd", "k$asd", "k%asd", "k^asd",
-      "k&asd", "k*asd", "k(asd", "k)asd",
-      "k$asd", "k+asd", "k=asd", "k\\asd",
-      "k]asd", "k[asd", "k|asd", "k}asd",
-      "k{asd", "k<asd", "k>asd", "k:asd",
-      "k;asd", "k'asd", "k\"asd"]
-      special_char_strings |> Enum.each(fn(value) ->
+      Support.rejected_special_chars("f", "kfk", [])
+      |> Enum.each(fn(value) ->
         check_error(create |> Map.put(:zip, value), %{zip: ["has invalid format"]})
       end)
     end
@@ -381,7 +342,8 @@ defmodule Owaygo.Location.Address.TestCreate do
     test "reject when country has special characters" do
       error = %{country: ["has invalid format"]}
       create = create()
-      @special_char_strings |> Enum.each(fn(value) -> value
+      Support.rejected_special_chars("ajsdf", "kasdfk", [])
+      |> Enum.each(fn(value) -> value
       |> check_invalid_value(create, :country, error) end)
     end
 

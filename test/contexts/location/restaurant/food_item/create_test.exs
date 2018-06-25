@@ -2,57 +2,33 @@ defmodule Owaygo.Location.Restaurant.FoodItem.CreateTest do
   use Owaygo.DataCase
   import Ecto.Query
 
-  alias Owaygo.User
-  alias Owaygo.Test.VerifyEmail
-  alias Owaygo.Location
   alias Owaygo.Location.Restaurant.FoodItem.Create
   alias Owaygo.MenuCategory
   alias Owaygo.Repo
   alias Ecto.DateTime
-  alias Owaygo.Location.Restaurant.Menu.Category
+  alias Owaygo.Support
 
-  @username "nkaffine"
+  @username "kaffine.n"
   @fname "Nick"
   @lname "Kaffine"
-  @email "nicholas.kaffine@gmail.com"
-
-  @name "Chicken Lou's"
-  @lat 59.12959120
-  @lng 175.1925125
+  @email "411rockstar@gmail.com"
 
   @food_item_name "Chicken Lou"
   @description "Fried chicken in a sub roll with our signature duck sauce"
   @price 7.99
   @category "main"
 
-  defp create_user() do
-    create = %{username: @username, fname: @fname, lname: @lname, email: @email}
-    assert {:ok, user} = User.Create.call(%{params: create})
-    user.id
-  end
-
-  defp verify_email(user_id, email) do
-    create = %{id: user_id, email: email}
-    assert {:ok, _email_verification} = VerifyEmail.call(%{params: create})
-  end
-
   defp create_location() do
-    create = %{username: "kaffine.n", fname: @fname, lname: @lname,
-    email: "411rockstar@gmail.com"}
-    assert {:ok, user} = User.Create.call(%{params: create})
-    verify_email(user.id, user.email)
-    create = %{name: @name, lat: @lat, lng: @lng, discoverer_id: user.id}
-    assert {:ok, location} = Location.Create.call(%{params: create})
-    {user.id, location.id}
+    assert {:ok, map} = Support.create_location()
+    {map.user, map.location}
   end
 
   defp create() do
-    user_id = create_user()
-    create_category(user_id)
-    {discoverer_id, location_id} = create_location()
+    {user, _category} = create_category()
+    {discoverer, location} = create_location()
     %{name: @food_item_name, description: @description, price: @price,
-    category: @category, user_id: user_id, location_id: location_id,
-    discoverer_id: discoverer_id}
+    category: @category, user_id: user.id, location_id: location.id,
+    discoverer_id: discoverer.id}
   end
 
   defp check_if_exists(create, value, key) do
@@ -76,8 +52,10 @@ defmodule Owaygo.Location.Restaurant.FoodItem.CreateTest do
     end
   end
 
-  defp create_category(user_id) do
-    assert {:ok, _category} = Category.Create.call(%{params: %{name: "main", user_id: user_id}})
+  defp create_category() do
+    assert {:ok, map} = Support.create_category(%{username: @username,
+    fname: @fname, lname: @lname, email: @email}, @category)
+    {map.user, map.category}
   end
 
   defp check_success(create) do

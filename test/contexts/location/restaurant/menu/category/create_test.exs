@@ -1,26 +1,13 @@
 defmodule Owaygo.Location.Restaurant.Menu.Category.CreateTest do
   use Owaygo.DataCase
-  alias Owaygo.User
-  alias Owaygo.Location.Restaurant.Menu.Category.Create
 
-  @username "nkaffine"
-  @fname "Nick"
-  @lname "Kaffine"
-  @email "nicholas.kaffine@gmail.com"
+  alias Owaygo.Location.Restaurant.Menu.Category.Create
+  alias Owaygo.Support
 
   @category_name "appetizers"
 
-  @special_chars ["`", "@", "~",
-  "#", "$", "%", "^",
-  "&", "*", "(", ")",
-  "$", "+", "=", "\\",
-  "]", "[", "|", "}",
-  "{", "<", ">", ":",
-  ";", "\""]
-
   defp create_user() do
-    create = %{username: @username, fname: @fname, lname: @lname, email: @email}
-    assert {:ok, user} = User.Create.call(%{params: create})
+    assert {:ok, user} = Support.create_user()
     user.id
   end
 
@@ -40,7 +27,6 @@ defmodule Owaygo.Location.Restaurant.Menu.Category.CreateTest do
     user_id = create_user()
     %{name: @category_name, user_id: user_id}
   end
-
 
   describe "various parameters missing" do
     test "reject when missing category name" do
@@ -67,7 +53,8 @@ defmodule Owaygo.Location.Restaurant.Menu.Category.CreateTest do
 
     test "reject when category name has special characters" do
       create = create()
-      @special_chars |> Enum.each(fn(value) ->
+      Support.accept_special_chars("kaf", "jasf", [])
+      |> Enum.each(fn(value) ->
         check_error(create |> Map.put(:name, "kaf" <> value <> "jasf"),
         %{name: ["has invalid format"]})
       end)

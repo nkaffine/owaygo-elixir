@@ -1,39 +1,16 @@
 defmodule Owaygo.Location.Hours.CreateTest do
   use Owaygo.DataCase
-
-  alias Owaygo.User
-  alias Owaygo.Test.VerifyEmail
-  alias Owaygo.Location
+  
   alias Owaygo.Location.Hours.Create
-
-  @username "nkaffine"
-  @fname "Nick"
-  @lname "Kaffine"
-  @email "nicholas.kaffine@gmail.com"
-
-  @name "Chicken Lou's"
-  @lat 69.98765
-  @lng 149.01240
+  alias Owaygo.Support
 
   @day "monday"
   @hour 13
   @opening true
 
-  defp create_user() do
-    create = %{username: @username, fname: @fname, lname: @lname, email: @email}
-    assert {:ok, user} = User.Create.call(%{params: create})
-    user.id
-  end
-
-  defp verify_email(user_id, email) do
-    create = %{id: user_id, email: email}
-    assert {:ok, _email_verification} = VerifyEmail.call(%{params: create})
-  end
-
-  defp create_location(user_id) do
-    create = %{name: @name, lat: @lat, lng: @lng, discoverer_id: user_id}
-    assert {:ok, location} = Location.Create.call(%{params: create})
-    location.id
+  defp create_location() do
+    assert {:ok, map} = Support.create_location()
+    {map.user, map.location}
   end
 
   defp check_success(create) do
@@ -51,10 +28,8 @@ defmodule Owaygo.Location.Hours.CreateTest do
   end
 
   defp create() do
-    user_id = create_user()
-    verify_email(user_id, @email)
-    location_id = create_location(user_id)
-    %{location_id: location_id, day: @day, hour: @hour, opening: @opening}
+    {_user, location} = create_location()
+    %{location_id: location.id, day: @day, hour: @hour, opening: @opening}
   end
 
   describe "missing paramters" do

@@ -1,6 +1,7 @@
 defmodule Owaygo.Location.Type.TestCreate do
   use Owaygo.DataCase
   alias Owaygo.Location.Type.Create
+  alias Owaygo.Support
 
   @typename "restaurant"
   @create %{name: @typename}
@@ -52,31 +53,10 @@ defmodule Owaygo.Location.Type.TestCreate do
   end
 
   test "reject name with special characters" do
-    invalid_name(%{name: "restuarant<"})
-    invalid_name(%{name: "restuarant>"})
-    invalid_name(%{name: "restuarant@"})
-    invalid_name(%{name: "restuarant#"})
-    invalid_name(%{name: "restuarant$"})
-    invalid_name(%{name: "restuarant^"})
-    invalid_name(%{name: "restuarant&"})
-    invalid_name(%{name: "restuarant*"})
-    invalid_name(%{name: "restuarant("})
-    invalid_name(%{name: "restuarant)"})
-    invalid_name(%{name: "restuarant+"})
-    invalid_name(%{name: "restuarant-"})
-    invalid_name(%{name: "restuarant="})
-    invalid_name(%{name: "restuarant/"})
-    invalid_name(%{name: "restuarant`"})
-    invalid_name(%{name: "restuarant~"})
-    invalid_name(%{name: "restuarant'"})
-    invalid_name(%{name: "restuarant\""})
-    invalid_name(%{name: "restuarant]"})
-    invalid_name(%{name: "restuarant["})
-    invalid_name(%{name: "restuarant<{"})
-    invalid_name(%{name: "restuarant}"})
-    invalid_name(%{name: "restuarant|"})
-    invalid_name(%{name: "restuarant;"})
-    invalid_name(%{name: "restuarant:"})
+    Support.rejected_special_chars("restaurant", "",[])
+    |> Enum.each(fn(value) ->
+      invalid_name(%{name: value})
+    end)
   end
 
   test "accept name that has exactly 255 characters" do

@@ -1,8 +1,7 @@
 defmodule Owaygo.Location.TestShow do
   use Owaygo.DataCase
   import Ecto.Query
-
-  alias Owaygo.User
+  
   alias Owaygo.Test.VerifyEmail
   alias Owaygo.Location
   alias Owaygo.Admin.CreateDiscoverer
@@ -11,25 +10,22 @@ defmodule Owaygo.Location.TestShow do
   alias Owaygo.Repo
   alias Owaygo.Location.Show
   alias Owaygo.User.OwnershipClaim
+  alias Owaygo.Support
 
-  @username "nkaffine"
-  @fname "nick"
-  @lname "kaffine"
   @email "nicholas.kaffine@gmail.com"
+  @username "nkaffine"
 
   @name "Chicken Lou's"
   @lat 79.12499125
   @lng 174.125125
 
   defp create_user() do
-    create = %{username: @username, fname: @fname, lname: @lname, email: @email}
-    assert {:ok, user} = User.Create.call(%{params: create})
+    assert {:ok, user} = Support.create_user()
     user.id
   end
 
   defp create_user(username, email) do
-    create = %{username: username, fname: @fname, lname: @lname, email: email}
-    assert {:ok, user} = User.Create.call(%{params: create})
+    assert {:ok, user} = Support.create_user(username, email)
     user.id
   end
 

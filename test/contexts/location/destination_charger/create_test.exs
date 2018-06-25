@@ -4,11 +4,6 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
   alias Owaygo.LocationType
   alias Owaygo.Support
 
-  @username "nkaffine"
-  @fname "nick"
-  @lname "kaffine"
-  @email "nicholas.kaffine@gmail.com"
-
   @name "Chicken Lou's"
   @lat 74.912481
   @lng 124.9124919
@@ -21,21 +16,12 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
 
   @tesla_id "dc12040"
 
-  @special_char_strings ["ajsdf`kasdfk", "ajsdfk@asdfk", "ajsdfk~asdfk",
-  "ajsdfk#asdfk", "ajsdfk$asdfk", "ajsdfk%asdfk", "ajsdfk^asdfk",
-  "ajsdfk&asdfk", "ajsdfk*asdfk", "ajsdfk(asdfk", "ajsdfk)asdfk",
-  "ajsdfk$asdfk", "ajsdfk+asdfk", "ajsdfk=asdfk", "ajsdfk\\asdfk",
-  "ajsdfk]asdfk", "ajsdfk[asdfk", "ajsdfk|asdfk", "ajsdfk}asdfk",
-  "ajsdfk{asdfk", "ajsdfk<asdfk", "ajsdfk>asdfk", "ajsdfk:asdfk",
-  "ajsdfk;asdfk", "ajsdfk'asdfk", "ajsdfk\"asdfk"]
-
   defp create_type() do
     assert {:ok, _type} = Support.create_location_type("destination_charger")
   end
 
   defp create() do
-    assert {:ok, user} = Support.create_user_verified_email(
-    %{username: @username, fname: @fname, lname: @lname, email: @email})
+    assert {:ok, user} = Support.create_user_verified_email()
     create_type()
     %{name: @name, lat: @lat, lng: @lng, street: @street, city: @city,
     state: @state, zip: @zip, country: @country, tesla_id: @tesla_id,
@@ -43,8 +29,7 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
   end
 
   defp create_without_email_verification() do
-    assert {:ok, user} = Support.create_user(
-    %{username: @username, fname: @fname, lname: @lname, email: @email})
+    assert {:ok, user} = Support.create_user()
     create_type()
     %{name: @name, lat: @lat, lng: @lng, street: @street, city: @city,
     state: @state, zip: @zip, country: @country, tesla_id: @tesla_id,
@@ -303,7 +288,8 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
 
     test "reject special characters" do
       create = create()
-      @special_char_strings |> Enum.each(fn(value) -> check_error(create
+      Support.rejected_special_chars("ajsdf", "kasdfk", [])
+      |> Enum.each(fn(value) -> check_error(create
       |> Map.put(:street, "1 " <> value), %{street: ["has invalid format"]})
       end)
     end
@@ -339,8 +325,9 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
 
     test "reject when city has special characters" do
       create = create()
-      @special_char_strings |> Enum.each(fn(value) -> check_error(create
-        |> Map.put(:city, value), %{city: ["has invalid format"]})
+      Support.rejected_special_chars("ajsdf", "kasdfk", [])
+      |> Enum.each(fn(value) -> check_error(create
+      |> Map.put(:city, value), %{city: ["has invalid format"]})
       end)
     end
 
@@ -375,7 +362,8 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
 
     test "reject when state has special characters" do
       create = create()
-      @special_char_strings |> Enum.each(fn(value) ->
+      Support.rejected_special_chars("ajsdf", "kasdfk", [])
+      |> Enum.each(fn(value) ->
         check_error(create |> Map.put(:state, value), %{state: ["has invalid format"]})
       end)
     end
@@ -413,14 +401,8 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
 
     test "reject when zip has special characters" do
       create = create()
-      special_char_strings = ["f`kfk", "k@asd", "k~asd",
-      "k#asd", "k$asd", "k%asd", "k^asd",
-      "k&asd", "k*asd", "k(asd", "k)asd",
-      "k$asd", "k+asd", "k=asd", "k\\asd",
-      "k]asd", "k[asd", "k|asd", "k}asd",
-      "k{asd", "k<asd", "k>asd", "k:asd",
-      "k;asd", "k'asd", "k\"asd"]
-      special_char_strings |> Enum.each(fn(value) ->
+      Support.rejected_special_chars("f", "kfk", [])
+      |> Enum.each(fn(value) ->
         check_error(create |> Map.put(:zip, value), %{zip: ["has invalid format"]})
       end)
     end
@@ -467,7 +449,7 @@ defmodule Owaygo.Location.DestinationCharger.CreateTest do
 
     test "reject when country has special characters" do
       create = create()
-      @special_char_strings |> Enum.each(fn(value) ->
+      Support.rejected_special_chars("ajsdf", "asdfk", []) |> Enum.each(fn(value) ->
         check_error(create |> Map.put(:country, value),
         %{country: ["has invalid format"]})
       end)

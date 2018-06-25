@@ -2,39 +2,27 @@ defmodule Owaygo.Location.TestCreate do
   use Owaygo.DataCase
 
   alias Owaygo.Location.Create
-  alias Owaygo.Test.VerifyEmail
-  alias Owaygo.User
   alias Owaygo.Location.Type
+  alias Owaygo.Support
 
-  @username "nkaffine"
-  @fname "Nick"
-  @lname "Kaffine"
-  @email "nicholas.kaffine@gmail.com"
-  @create %{username: @username, fname: @fname, lname: @lname, email: @email}
   @lat 75.12501251251
   @lng 175.1259591251
   @name "Chicken Lou's"
 
   #creates a user and returns the new user's id
   defp create_user() do
-    assert {:ok, user} = User.Create.call(%{params: @create})
+    assert {:ok, user} = Support.create_user_verified_email()
     user.id
-  end
-
-  defp verify_email(id) do
-    assert {:ok, _verification} = VerifyEmail.call(%{params: %{id: id, email: @email}})
   end
 
   defp create() do
     id = create_user()
-    verify_email(id)
     %{lat: @lat, lng: @lng, name: @name, discoverer_id: id}
   end
 
   #Creates a location type and returns the id
   defp create_type(name) do
-    attrs = %{name: name}
-    {:ok, type} = Type.Create.call(%{params: attrs})
+    {:ok, type} = Support.create_location_type(name)
     type.id
   end
 
@@ -142,15 +130,14 @@ defmodule Owaygo.Location.TestCreate do
   #these depend on whether discoverers are the only ones who can discover places
   test "accepts when the user exists but is not a discoverer" do
     user_id = create_user()
-    verify_email(user_id)
     create = %{lat: @lat, lng: @lng, name: @name, discoverer_id: user_id}
     check_success(create)
   end
 
   #only let people who have verified their email discover things?
   test "reject when user exists but has not verified their email" do
-    user_id = create_user()
-    create = %{lat: @lat, lng: @lng, name: @name, discoverer_id: user_id}
+    assert {:ok, user} = Support.create_user()
+    create = %{lat: @lat, lng: @lng, name: @name, discoverer_id: user.id}
     check_error(create, %{discoverer_id: ["email has not been verified"]})
   end
 
