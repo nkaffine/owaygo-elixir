@@ -4,7 +4,7 @@ defmodule OwaygoWeb.Tag.FoodItem.Controller do
   alias OwaygoWeb.Errors
 
   def create(conn, params) do
-    attrs = %{location_id: params["location_id"], tag_id: params["tag_id"]}
+    attrs = %{food_item_id: params["food_item_id"], tag_id: params["tag_id"]}
       case Create.call(%{params: attrs}) do
         {:ok, food_item_tag} -> render_food_item_tag(conn, food_item_tag)
         {:error, changeset} -> Errors.render_error(conn, changeset)
@@ -12,7 +12,7 @@ defmodule OwaygoWeb.Tag.FoodItem.Controller do
   end
 
   defp render_food_item_tag(conn, food_item_tag) do
-    {:ok, body} = %{location_id: food_item_tag.location_id,
+    {:ok, body} = %{food_item_id: food_item_tag.food_item_id,
     tag_id: food_item_tag.tag_id,
     inserted_at: food_item_tag.inserted_at,
     updated_at: food_item_tag.updated_at,
