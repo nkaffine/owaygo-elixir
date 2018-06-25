@@ -277,7 +277,7 @@ defmodule Owaygo.Support do
   """
   def create_tag(user_param_map, tag_name) do
     case create_user(user_param_map) do
-      {:ok, user} -> case Tag.Create.Call(%{name: tag_name, user_id, user.id}) do
+      {:ok, user} -> case Tag.Create.call(%{params: %{name: tag_name, user_id: user.id}}) do
         {:ok, tag} -> {:ok, %{user: user, tag: tag}}
         {:error, error} -> {:error, error}
       end
