@@ -6,6 +6,7 @@ defmodule Owaygo.Support do
   alias Owaygo.Location.Restaurant.Menu.Category
   alias Owaygo.Tag
   alias Owaygo.Location.Restaurant.FoodItem
+  alias Ecto.DateTime
 
 
   #some constants for testing
