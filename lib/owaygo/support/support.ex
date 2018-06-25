@@ -4,6 +4,7 @@ defmodule Owaygo.Support do
   alias Owaygo.Location
   alias Owaygo.Location.Type
   alias Owaygo.Location.Restaurant.Menu.Category
+  alias Owaygo.Tag
 
 
   #some constants for testing
@@ -178,6 +179,15 @@ defmodule Owaygo.Support do
     create_location(location_param_map())
   end
 
+  @doc """
+  Create a location with the given user as the discoverer and default location
+  data> Returns either {:ok, location} or {:error, error}
+  """
+  def create_location_with_user(user) do
+    Location.Create.call(%{params: location_param_map()
+    |> Map.put(:discoverer_id: user.id)})
+  end
+
   # Creates a location with the given parameters. Returns either {:ok, location}
   #or {:error, error} tuple.
   defp make_location(param_map) do
@@ -257,5 +267,27 @@ defmodule Owaygo.Support do
     special_chars |> Enum.map(fn(value) ->
       prefix <> value <> suffix
     end)
+  end
+
+  @doc """
+  Creates a tag with the given tag_name and a user with the given parameters
+  and either returns {:ok, %{user: user, tag: tag}} or {:error, error}
+  """
+  def create_tag(user_param_map, tag_name) do
+    case create_user(user_param_map) do
+      {:ok, user} -> case Tag.Create.Call(%{name: tag_name, user_id, user.id}) do
+        {:ok, tag} -> {:ok, %{user: user, tag: tag}}
+        {:error, error} -> {:error, error}
+      end
+      {:error, error} -> {:error, error}
+    end
+  end
+
+  @doc """
+  Creates a tag with the given tag name and the default fields for a user. Either
+  returns {:ok, %{user: user, tag: tag}} or {:error, error}
+  """
+  def create_tag(tag_name) do
+    create_tag(user_param_map(), tag_name)
   end
 end
