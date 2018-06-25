@@ -5,6 +5,7 @@ defmodule Owaygo.Support do
   alias Owaygo.Location.Type
   alias Owaygo.Location.Restaurant.Menu.Category
   alias Owaygo.Tag
+  alias Owaygo.Location.Restaurant.FoodItem
 
 
   #some constants for testing
@@ -31,6 +32,11 @@ defmodule Owaygo.Support do
   "]", "[", "|", "}",
   "{", "<", ">", ":",
   ";", "\""]
+
+  @food_item_name "Chicken Lou"
+  @description "Fried chicken in a sub roll with our signature duck sauce"
+  @price 7.99
+  @category "main"
 
   @doc """
   Creates the param map for the default user in testing
@@ -306,5 +312,61 @@ defmodule Owaygo.Support do
   """
   def ecto_datetime_to_date_string(datetime) do
     datetime |> DateTime.cast! |> DateTime.to_date |> to_string
+  end
+
+  @doc """
+  Creates a food item, location, and user with the given user param map, location
+  param map, and food item param map. Returns either
+  {:ok, %{location: location, user: user, food_item: food_item}} or {:error, error}
+  """
+  def create_food_item(user_param_map, location_param_map, food_item_param_map) do
+    case create_location(user_param_map, location_param_map) do
+      {:error, error} -> {:error, error}
+      {:ok, %{user: user, location: location}} -> case create_category(food_item_param_map.category) do
+        {:error, error} -> {:error, error}
+        {:ok, _category} -> case
+        FoodItem.Create.call(%{params: food_item_param_map
+        |> Map.put(:locaton_id, location.id)
+        |> Map.put(:user_id, user.id)}) do
+          {:error, error} -> {:error, error}
+          {:ok, food_item} -> {:ok, %{location: location, user: user, food_item: food_item}}
+        end
+      end
+    end
+  end
+
+  @doc """
+  Creates a food item with the given food item param map and the default parameters
+  for the user and location. Returns either
+  {:ok, %{location: location, user: user, food_item: food_item}} or {error: error}
+  """
+  def create_food_item(food_item_param_map) do
+    create_food_item(user_param_map(), location_param_map(), food_item_param_map)
+  end
+
+  @doc """
+  Creates a food item with the default parameters for user, location, and food item.
+  Returns either {:ok, %{location: location, user: user, food_item: food_item}} or
+  {:error, error}
+  """
+  def create_food_item() do
+    create_food_item(user_param_map(), location_param_map(), food_item_param_map())
+  end
+
+  @doc """
+  Creates the default parameter map for a food item
+  """
+  def food_item_param_map() do
+    %{name: @food_item_name, description: @description, price: @price, category: @category}
+  end
+
+  @doc """
+  Creates a food item with the default parameters for the food item and the given
+  location and user. Returns either {:ok, food_item} or {:error, error}
+  """
+  def create_food_item_with_user_and_location(user, location) do
+    FoodItem.Create.call(%{params: food_item_param_map()
+    |> Map.put(:user_id, user.id)
+    |> Map.put(:location_id, location.id)})
   end
 end
