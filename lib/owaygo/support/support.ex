@@ -118,9 +118,11 @@ defmodule Owaygo.Support do
     |> Map.put(:email, email))
   end
 
-  # verifies the email of the given user, returns {:ok, _email_verification} or
-  #{:error, error} tuple
-  defp verify_email(user) do
+  @doc """
+  Verifies the emaul of the given user. Returns either {:ok, emaul_verification}
+  or {:error, error}
+  """
+  def verify_email(user) do
     VerifyEmail.call(%{params: %{id: user.id, email: user.email}})
   end
 
