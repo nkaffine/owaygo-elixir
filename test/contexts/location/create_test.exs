@@ -2,7 +2,6 @@ defmodule Owaygo.Location.TestCreate do
   use Owaygo.DataCase
 
   alias Owaygo.Location.Create
-  alias Owaygo.Location.Type
   alias Owaygo.Support
 
   @lat 75.12501251251
