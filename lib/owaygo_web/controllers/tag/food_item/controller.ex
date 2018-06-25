@@ -15,7 +15,8 @@ defmodule OwaygoWeb.Tag.FoodItem.Controller do
     {:ok, body} = %{location_id: food_item_tag.location_id,
     tag_id: food_item_tag.tag_id,
     inserted_at: food_item_tag.inserted_at,
-    updated_at: food_item_tag.updated_at} |> Poison.encode
+    updated_at: food_item_tag.updated_at,
+    average_rating: food_item_tag.average_rating} |> Poison.encode
     conn |> resp(201, body)
   end
 end
