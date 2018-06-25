@@ -324,12 +324,11 @@ defmodule Owaygo.Support do
       {:error, error} -> {:error, error}
       {:ok, %{user: user, location: location}} -> case create_category(food_item_param_map.category) do
         {:error, error} -> {:error, error}
-        {:ok, _category} -> case
-        FoodItem.Create.call(%{params: food_item_param_map
+        {:ok, _category} -> case FoodItem.Create.call(%{params: food_item_param_map
         |> Map.put(:locaton_id, location.id)
         |> Map.put(:user_id, user.id)}) do
-          {:error, error} -> {:error, error}
           {:ok, food_item} -> {:ok, %{location: location, user: user, food_item: food_item}}
+          {:error, error} -> {:error, error}
         end
       end
     end
