@@ -1,7 +1,7 @@
 defmodule OwaygoWeb.Rating.Location.Controller do
   use OwaygoWeb, :controller
   alias Owaygo.Rating.Location.Create
-  alias OwaygoWeb.Errrors
+  alias OwaygoWeb.Errors
 
   def create(conn, params) do
     attrs = %{location_id: params["location_id"], tag_id: params["tag_id"],
