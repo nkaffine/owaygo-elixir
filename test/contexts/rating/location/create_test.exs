@@ -6,13 +6,13 @@ defmodule Owaygo.Rating.Location.CreateTest do
   alias Owaygo.User
 
   defp create() do
-    {:ok, %{user: user, location: location, tag: tag, location_tag: location_tag}}
+    {:ok, %{user: user, location: location, tag: tag, location_tag: _location_tag}}
     = Support.create_location_tag()
     %{location_id: location.id, user_id: user.id, tag_id: tag.id, rating: 4}
   end
 
   defp create_without_verification() do
-    {:ok, %{user: user, location: location, tag: tag, location_tag: location_tag}}
+    {:ok, %{user: _user, location: location, tag: tag, location_tag: _location_tag}}
     = Support.create_location_tag()
     {:ok, user2} = Support.create_user("kaffine.n", "411rockstar@gmail.com")
     %{location_id: location.id, user_id: user2.id, tag_id: tag.id, rating: 4}
@@ -129,20 +129,41 @@ defmodule Owaygo.Rating.Location.CreateTest do
       %{location_tag: ["does not exist"]})
     end
 
-    test "reject when there is no location tag with the given tag_id location"
+    test "reject when there is no location tag with the given tag_id location" do
+      create = create()
+      assert {:ok, location} = Support.create_location_with_user(%{%User{} | id: create.user_id})
+      check_error(create |> Map.put(:location_id, location.id),
+      %{location_tag: ["does not exist"]})
+    end
   end
 
   describe "validity of rating" do
-    test "reject when rating is not an integer"
+    test "reject when rating is not an integer" do
+      check_error(create() |> Map.put(:rating, "kasgk"),
+      %{rating: ["is invalid"]})
+    end
 
-    test "reject when rating is a float"
+    test "reject when rating is a float" do
+      check_error(create() |> Map.put(:rating, 4.5),
+      %{rating: ["is invalid"]})
+    end
 
-    test "reject when rating is greater than 5"
+    test "reject when rating is greater than 5" do
+      check_error(create() |> Map.put(:rating, 6),
+      %{rating: ["should be greater than or equal to 1 or less than or equal to 5"]})
+    end
 
-    test "reject when rating is less than 1"
+    test "reject when rating is less than 1" do
+      check_error(create() |> Map.put(:rating, 0),
+      %{rating: ["should be greater than or equal to 1 or less than or equal to 5"]})
+    end
 
-    test "accept when rating is exactly 1"
+    test "accept when rating is exactly 1" do
+      check_success(create() |> Map.put(:rating, 1))
+    end
 
-    test "accept when rating is exactly 5"
+    test "accept when rating is exactly 5" do
+      check_success(create() |> Map.put(:rating, 5))
+    end
   end
 end
