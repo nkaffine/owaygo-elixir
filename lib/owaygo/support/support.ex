@@ -39,6 +39,8 @@ defmodule Owaygo.Support do
   @price 7.99
   @category "main"
 
+  @tag_name "texture"
+
   @doc """
   Creates the param map for the default user in testing
   """
@@ -279,7 +281,7 @@ defmodule Owaygo.Support do
   end
 
   @doc """
-  Creates a tag with the given tag_name and a user with the given parameters
+    Creates a tag with the given tag_name and a user with the given parameters
   and either returns {:ok, %{user: user, tag: tag}} or {:error, error}
   """
   def create_tag(user_param_map, tag_name) do
@@ -298,6 +300,14 @@ defmodule Owaygo.Support do
   """
   def create_tag(tag_name) do
     create_tag(user_param_map(), tag_name)
+  end
+
+  @doc """
+  Creates a tag with the given tag name and the given user. Returns either
+  {:ok, tag} or {:error, error}
+  """
+  def create_tag_with_user(user, tag_name) do
+    Tag.Create.call(%{params: %{name: tag_name, user_id: user.id}})
   end
 
   @doc """
@@ -369,4 +379,34 @@ defmodule Owaygo.Support do
     |> Map.put(:user_id, user.id)
     |> Map.put(:location_id, location.id)})
   end
+
+  @doc """
+  Creates a location tag with the given user param map, location param map, and
+  tag param map. Returns either {:ok, %{location: location, user: user,
+  tag: tag, location_tag: locationg_tag}} or {:error, error}
+  """
+  def create_location_tag(user_param_map, location_param_map, tag_name) do
+    case create_location(user_param_map, location_param_map) do
+      {:error, error} -> {:error, error}
+      {:ok, %{location: location, user: user}} -> case create_tag_with_user(user, tag_name) do
+        {:error, error} -> {:error, error}
+        {:ok, tag} -> case Tag.Location.Create.call(
+        %{params: %{tag_id: tag.id, location_id: location.id}}) do
+          {:error, error} -> {:error, error}
+          {:ok, location_tag} -> {:ok, %{location: location, user: user,
+          tag: tag, location_tag: location_tag}}
+        end
+      end
+    end
+  end
+
+  @doc """
+  Creates a location tag with the default paramerts for user, location, and tag.
+  Returns either {:ok, %{user: user, location: location, tag: tag, location_tag: location_tag}}
+  or {:error, error}
+  """
+  def create_location_tag() do
+    create_location_tag(user_param_map(), location_param_map(), @tag_name)
+  end
+
 end
