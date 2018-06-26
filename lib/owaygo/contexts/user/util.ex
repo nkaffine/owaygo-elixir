@@ -28,7 +28,9 @@ defmodule Owaygo.User.Util do
     and not is_nil(e.verification_date), select: count(e.id)) == 1
   end
 
-
+  @doc """
+  Checks whether the current email for the given user has been verified
+  """
   def verified_email?(user_id) do
     if(exists?(user_id)) do
       verified_email?(user_id, get_email(user_id))
