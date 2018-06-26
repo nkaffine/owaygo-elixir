@@ -5,7 +5,7 @@ defmodule Owaygoweb.Rating.Location.CreateTest do
   alias Owaygo.User
 
   defp create() do
-    {:ok, %{user: user, location: location, tag: tag, location_tag: location_tag}}
+    {:ok, %{user: user, location: location, tag: tag, location_tag: _location_tag}}
     = Support.create_location_tag()
     %{location_id: location.id, tag_id: tag.id, user_id: user.id, rating: 4}
   end
