@@ -13,7 +13,7 @@ defmodule Owaygoweb.Rating.Location.CreateTest do
   test "given valid parameters returns valid response" do
     create = create()
     conn = build_conn() |> post("/api/v1/rating/location", create)
-    body = conn |> Poison.decode!
+    body = conn |> response(201) |> Poison.decode!
     assert body["id"] |> is_integer
     assert body["id"] > 0
     assert body["location_id"] == create.location_id
@@ -28,9 +28,9 @@ defmodule Owaygoweb.Rating.Location.CreateTest do
   test "throws error when given location tag info that does not exist" do
     create = create()
     assert {:ok, tag} = Support.create_tag_with_user(%{%User{} | id: create.user_id}, "some tag")
-    create = create |> Map.put(:tag, tag)
+    create = create |> Map.put(:tag_id, tag.id)
     conn = build_conn() |> post("/api/v1/rating/location", create)
-    body = conn |> Posion.decode!
+    body = conn |> response(400) |> Poison.decode!
     assert body["id"] == nil
     assert body["location_id"] == nil
     assert body["rating"] == nil
@@ -38,13 +38,13 @@ defmodule Owaygoweb.Rating.Location.CreateTest do
     assert body["user_id"] == nil
     assert body["inserted_at"] == nil
     assert body["updated_at"] == nil
-    assert body["location_tag"] == ["doesn't exist"]
+    assert body["location_tag"] == ["does not exist"]
   end
 
   test "throws an error when given invalid responses" do
     create = create() |> Map.delete(:user_id)
     conn = build_conn() |> post("/api/v1/rating/location", create)
-    body = conn |> Posion.decode!
+    body = conn |> response(400) |> Poison.decode!
     assert body["id"] == nil
     assert body["location_id"] == nil
     assert body["rating"] == nil
