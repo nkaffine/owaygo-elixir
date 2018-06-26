@@ -26,6 +26,7 @@ defmodule OwaygoWeb.Router do
     resources "/tag", Tag.TagController, only: [:create]
     resources "/tag/location", Tag.Location.Controller, only: [:create]
     resources "/tag/food-item", Tag.FoodItem.Controller, only: [:create]
+    resources "/rating/location", Rating.Location.Controller, only: [:create]
   end
 
   scope "/api/v1/admin", OwaygoWeb do
