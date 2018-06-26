@@ -75,7 +75,7 @@ defmodule Owaygo.Rating.Location.CreateTest do
     end
 
     test "accept when user has not verified their email" do
-      check_error(create_without_verification(), %{user_id: ["has not verified their email"]})
+      check_error(create_without_verification(), %{user_id: ["email not verified"]})
     end
 
     test "accept when user has already rated this location tag" do
@@ -101,7 +101,7 @@ defmodule Owaygo.Rating.Location.CreateTest do
 
     test "reject when location_id is negative" do
       check_error(create() |> Map.put(:location_id, -1249),
-      %{lcoation_id: ["does not exist"]})
+      %{location_id: ["does not exist"]})
     end
   end
 
@@ -150,12 +150,12 @@ defmodule Owaygo.Rating.Location.CreateTest do
 
     test "reject when rating is greater than 5" do
       check_error(create() |> Map.put(:rating, 6),
-      %{rating: ["should be greater than or equal to 1 or less than or equal to 5"]})
+      %{rating: ["must be less than or equal to 5"]})
     end
 
     test "reject when rating is less than 1" do
       check_error(create() |> Map.put(:rating, 0),
-      %{rating: ["should be greater than or equal to 1 or less than or equal to 5"]})
+      %{rating: ["must be greater than or equal to 1"]})
     end
 
     test "accept when rating is exactly 1" do
