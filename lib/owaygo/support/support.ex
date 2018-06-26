@@ -245,6 +245,11 @@ defmodule Owaygo.Support do
     end
   end
 
+
+  def create_category_with_user(user, category_name) do
+    Category.Create.call(%{params: %{name: category_name, user_id: user.id}})
+  end
+
   @doc """
   Creates an array of special character strings with each having the given
   prefix and suffix and excluding any special characters included in the except
@@ -341,10 +346,10 @@ defmodule Owaygo.Support do
   def create_food_item(user_param_map, location_param_map, food_item_param_map) do
     case create_location(user_param_map, location_param_map) do
       {:error, error} -> {:error, error}
-      {:ok, %{user: user, location: location}} -> case create_category(food_item_param_map.category) do
+      {:ok, %{user: user, location: location}} -> case create_category_with_user(user, food_item_param_map.category) do
         {:error, error} -> {:error, error}
         {:ok, _category} -> case FoodItem.Create.call(%{params: food_item_param_map
-        |> Map.put(:locaton_id, location.id)
+        |> Map.put(:location_id, location.id)
         |> Map.put(:user_id, user.id)}) do
           {:ok, food_item} -> {:ok, %{location: location, user: user, food_item: food_item}}
           {:error, error} -> {:error, error}
@@ -415,6 +420,38 @@ defmodule Owaygo.Support do
   """
   def create_location_tag() do
     create_location_tag(user_param_map(), location_param_map(), @tag_name)
+  end
+
+  @doc """
+  Creates a food item tag with the given parameters for user, location, food item
+  and tag name. Returns either {:ok, %{user: user, location: location, food_item: food_item,
+  tag: tag, food_item_tag: food_item_tag}} or {:error, error}
+  """
+  def create_food_item_tag(user_param_map, location_param_map,
+  food_item_param_map, tag_name) do
+    case create_food_item(user_param_map, location_param_map, food_item_param_map) do
+      {:error, error} -> {:error, error}
+      {:ok, %{user: user, location: location, food_item: food_item}} ->
+        case create_tag_with_user(user, tag_name) do
+          {:error, error} -> {:error, error}
+          {:ok, tag} -> case Tag.FoodItem.Create.call(%{params:
+          %{tag_id: tag.id, food_item_id: food_item.id}}) do
+            {:error, error} -> {:error, error}
+            {:ok, food_item_tag} -> {:ok, %{user: user, location: location,
+            tag: tag, food_item: food_item, food_item_tag: food_item_tag}}
+          end
+        end
+    end
+  end
+
+  @doc """
+  Creates a food item tag with the default user, location, food_item, and tag name.
+  Either returns {:ok, %{user: user, location: location, food_item: food_item,
+  tag: tag, food_item_tag: food_item_tag}} or {:error, error]
+  """
+  def create_food_item_tag() do
+    create_food_item_tag(user_param_map(), location_param_map(),
+    food_item_param_map(), @tag_name)
   end
 
 end
