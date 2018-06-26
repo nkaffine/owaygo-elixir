@@ -311,6 +311,14 @@ defmodule Owaygo.Support do
   end
 
   @doc """
+  Creates a tag with the given user and the default tag name. Returns either
+  {:ok, tag} or {:error, error}
+  """
+  def creat_tag_with_user(user) do
+    create_tag_with_user(user, @tag_name)
+  end
+
+  @doc """
   Returns the string with the current date
   """
   def today() do
