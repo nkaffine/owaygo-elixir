@@ -6,7 +6,7 @@ defmodule Owaygo.Repo.Migrations.AddLocationTagTable do
       add :average_rating, :float
       add :location_id, references(:location)
       add :tag_id, references(:tag)
-      timestamps
+      timestamps()
     end
 
     create unique_index(:location_tag, [:location_id, :tag_id], primary_key: true, name: :location_tag_pair)
