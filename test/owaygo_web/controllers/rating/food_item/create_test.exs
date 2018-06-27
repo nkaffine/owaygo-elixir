@@ -12,7 +12,7 @@ defmodule OwaygoWeb.Rating.FoodItem.CreateTest do
 
   test "given valid parameters return valid response" do
     create = create()
-    conn = build_conn() |> post("/api/v1/rating/food-item")
+    conn = build_conn() |> post("/api/v1/rating/food-item", create)
     body = conn |> response(201) |> Poison.decode!
     assert body["id"] |> is_integer
     assert body["id"] > 0
@@ -20,8 +20,8 @@ defmodule OwaygoWeb.Rating.FoodItem.CreateTest do
     assert body["food_item_id"] == create.food_item_id
     assert body["tag_id"] == create.tag_id
     assert body["inserted_at"] |> Support.ecto_datetime_to_date_string == Support.today()
-    assert body["update_at"] |> Support.ecto_datetime_to_date_string == Support.today()
-    assert body["food_item_tag"] == ["does not exist"]
+    assert body["updated_at"] |> Support.ecto_datetime_to_date_string == Support.today()
+    assert body["food_item_tag"] == nil
   end
 
   test "given food_item_tag that does not exist throw an error" do
@@ -29,7 +29,7 @@ defmodule OwaygoWeb.Rating.FoodItem.CreateTest do
     assert {:ok, tag} = Support.create_tag_with_user(
     %{%User{} | id: create.user_id}, "some tag")
     create = create |> Map.put(:tag_id, tag.id)
-    conn = build_conn() |> post("/api/v1/rating/food-item")
+    conn = build_conn() |> post("/api/v1/rating/food-item", create)
     body = conn |> response(400) |> Poison.decode!
     assert body["id"] == nil
     assert body["user_id"] == nil
@@ -42,7 +42,7 @@ defmodule OwaygoWeb.Rating.FoodItem.CreateTest do
 
   test "throw an error when given invalid parameters" do
     create = create() |> Map.delete(:user_id)
-    conn = build_conn() |> post("/api/v1/rating/food-item")
+    conn = build_conn() |> post("/api/v1/rating/food-item", create)
     body = conn |> response(400) |> Poison.decode!
     assert body["id"] == nil
     assert body["user_id"] == ["can't be blank"]
