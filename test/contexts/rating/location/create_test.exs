@@ -1,9 +1,11 @@
 defmodule Owaygo.Rating.Location.CreateTest do
   use Owaygo.DataCase
+  import Ecto.Query
 
   alias Owaygo.Support
   alias Owaygo.Rating.Location.Create
   alias Owaygo.User
+  alias Owaygo.LocationRating
 
   defp create() do
     {:ok, %{user: user, location: location, tag: tag, location_tag: _location_tag}}
@@ -84,6 +86,7 @@ defmodule Owaygo.Rating.Location.CreateTest do
       updated_at = rating.updated_at
       rating = check_success(create)
       refute updated_at == rating.updated_at
+      assert Repo.one!(from r in LocationRating, select: count(r.id)) == 1
     end
   end
 
