@@ -394,6 +394,17 @@ defmodule Owaygo.Support do
   end
 
   @doc """
+  Create a food item with the given name item and the given location and user.
+  Returns either {:ok, food_item} or {:error, error}
+  """
+  def create_food_item_with_user_and_location(user, location, item_name) do
+    FoodItem.Create.call(%{params: food_item_param_map()
+    |> Map.put(:user_id, user.id)
+    |> Map.put(:location_id, location.id)
+    |> Map.put(:name, item_name)})
+  end
+
+  @doc """
   Creates a location tag with the given user param map, location param map, and
   tag param map. Returns either {:ok, %{location: location, user: user,
   tag: tag, location_tag: locationg_tag}} or {:error, error}
