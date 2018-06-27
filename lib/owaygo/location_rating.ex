@@ -3,9 +3,9 @@ defmodule Owaygo.LocationRating do
 
   schema "location_rating" do
     field :rating, :integer
-    belongs_to :user, Owaygo.User, foreign_key: :user_id, primary_key: true
-    belongs_to :tag, Owaygo.Tag, foreign_key: :tag_id, primary_key: true
-    belongs_to :location, Owaygo.Location, foreign_key: :location_id, primary_key: true
+    belongs_to :user, Owaygo.User, foreign_key: :user_id
+    belongs_to :tag, Owaygo.Tag, foreign_key: :tag_id
+    belongs_to :location, Owaygo.Location, foreign_key: :location_id
     timestamps
   end
 end
