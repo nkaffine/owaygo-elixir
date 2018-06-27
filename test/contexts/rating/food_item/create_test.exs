@@ -7,6 +7,7 @@ defmodule Owaygo.Rating.FoodItem.CreateTest do
   alias Owaygo.User
   alias Owaygo.FoodItem
   alias Owaygo.Location
+  alias Owaygo.FoodItemRating
 
   defp create() do
     assert {:ok, map} = Support.create_food_item_tag()
@@ -176,5 +177,6 @@ defmodule Owaygo.Rating.FoodItem.CreateTest do
     rating = check_success(create |> Map.put(:rating, 2))
     refute updated_at == rating.updated_at
     refute rating.rating == score
+    assert Repo.one!(from r in FoodItemRating, select: count(r.id)) == 1
   end
 end
