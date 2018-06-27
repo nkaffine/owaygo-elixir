@@ -9,7 +9,7 @@ defmodule Owaygo.Repo.Migrations.AddingLocationRatingTable do
       add :tag_id, references(:tag)
       timestamps()
     end
-    create unique_index(:location_rating, [:user_id, :location_id, :tag_id], primary_key: true)
+    create unique_index(:location_rating, [:user_id, :location_id, :tag_id])
   end
 
   def down do
