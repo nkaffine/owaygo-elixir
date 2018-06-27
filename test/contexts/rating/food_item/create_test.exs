@@ -28,6 +28,7 @@ defmodule Owaygo.Rating.FoodItem.CreateTest do
     assert rating.rating == create.rating
     assert rating.inserted_at |> Support.ecto_datetime_to_date_string == Support.today()
     assert rating.updated_at |> Support.ecto_datetime_to_date_string == Support.today()
+    rating
   end
 
   defp check_error(create, error) do
@@ -106,7 +107,7 @@ defmodule Owaygo.Rating.FoodItem.CreateTest do
       location_id = Repo.one!(from f in FoodItem, where: f.id == ^create.food_item_id,
       select: f.location_id)
       assert {:ok, food_item} = Support.create_food_item_with_user_and_location(
-      %{%User{} | id: create.user_id}, %{%Location{} | id: location_id})
+      %{%User{} | id: create.user_id}, %{%Location{} | id: location_id}, "some food item")
       check_error(create |> Map.put(:food_item_id, food_item.id),
       %{food_item_tag: ["does not exist"]})
     end
@@ -163,7 +164,17 @@ defmodule Owaygo.Rating.FoodItem.CreateTest do
     end
 
     test "accept when rating is exactly 1" do
-      check_success(create() |> Map.put(:rating, 0))
+      check_success(create() |> Map.put(:rating, 1))
     end
+  end
+
+  test "wehn reviewing something twice, updates the rating instead of inserting it" do
+    create = create()
+    rating = check_success(create)
+    updated_at = rating.updated_at
+    score = rating.rating
+    rating = check_success(create |> Map.put(:rating, 2))
+    refute updated_at == rating.updated_at
+    refute rating.rating == score
   end
 end
