@@ -30,6 +30,13 @@ defmodule OwaygoWeb.Router do
     resources "/rating/food-item", Rating.FoodItem.Controller, only: [:create]
   end
 
+  scope "api/v1/owner", OwaygoWeb do
+    pipe_through :api
+
+    resources "/coupon", CouponController, only: [:create]
+
+  end
+
   scope "/api/v1/admin", OwaygoWeb do
     pipe_through :api
     resources "/discoverer", AdminDiscovererController, only: [:create]
