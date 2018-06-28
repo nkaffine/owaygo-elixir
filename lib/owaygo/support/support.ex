@@ -7,6 +7,7 @@ defmodule Owaygo.Support do
   alias Owaygo.Tag
   alias Owaygo.Location.Restaurant.FoodItem
   alias Ecto.DateTime
+  alias Owaygo.Owner
 
 
   #some constants for testing
@@ -40,6 +41,17 @@ defmodule Owaygo.Support do
   @category "main"
 
   @tag_name "texture"
+
+  @coupon_description "this is a generic description for a coupon"
+  @start_date Date.utc_today |> to_string
+  @end_date Date.utc_today |> Date.add(14) |> to_string
+  @coupons_offered 15
+  @gender "male"
+  @visited false
+  @min_age 16
+  @max_age 20
+  @percentage_value 20
+  @dollar_value 15.12
 
   @doc """
   Creates the param map for the default user in testing
@@ -463,6 +475,41 @@ defmodule Owaygo.Support do
   def create_food_item_tag() do
     create_food_item_tag(user_param_map(), location_param_map(),
     food_item_param_map(), @tag_name)
+  end
+
+  @doc """
+  Creates a location with the given parameters and a user with the given
+  parameters and makes the user the owner of the location. Either returns
+  {:ok, %{user: user, location: location}} or {:error, error}
+  """
+  def create_location_with_owner(user_params, location_params) do
+    case create_location(user_params, location_params) do
+      {:error, error} -> {:error, error}
+      {:ok, %{user: user, location: location}} ->
+        case Owner.Util.make_owner(user.id, location.id) do
+          {:ok, _owner} -> {:ok, %{user: user, location: location}}
+          {:error, error} -> {:error, error}
+        end
+    end
+  end
+
+  @doc """
+  Create a location and a user who is the owner of the location with the default
+  parameters for both users and locations. Either returns {:ok, %{user: user, location: location}}
+  or {:error, error}
+  """
+  def create_location_with_owner() do
+    create_location_with_owner(user_param_map(), location_param_map())
+  end
+
+  @doc """
+  Creates the default map of parameters for creating a coupon
+  """
+  def coupon_param_map() do
+    %{description: @coupon_description, start_date: @start_date,
+    end_date: @end_date, offered: @offered, gender: @gender, visited: @visited,
+    min_age: @min_age, max_age: @max_age, percentage_value: @percentage_value,
+    dollar_value: @dollar_values}
   end
 
 end
