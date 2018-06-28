@@ -178,9 +178,9 @@ defmodule Owaygo.Coupon.CreateTest do
     end
 
     test "reject when start_date is after end date if there is one" do
-      check_error(create() |> Map.put(:start_date, Date.utc_today)
-      |> Map.put(:end_date, Date.add(Date.utc_today, -10)),
-      %{start_date: ["must come before end date"]})
+      check_error(create() |> Map.put(:start_date, Date.add(Date.utc_today, 10))
+      |> Map.put(:end_date, Date.utc_today),
+      %{start_date: ["must come before end date"]})å
     end
   end
 
@@ -201,6 +201,11 @@ defmodule Owaygo.Coupon.CreateTest do
 
     test "accept when end_date is a date" do
       check_success(create() |> Map.put(:end_date, Date.add(Date.utc_today, 20)))
+    end
+
+    test "reject when end_date is less than current date" do
+      check_error(create() |> Map.put(:end_date, Date.add(Date.utc_today, -1)),
+      %{end_date: ["must be after current date"]})
     end
   end
 
