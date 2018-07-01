@@ -4,7 +4,7 @@ defmodule OwaygoWeb.Coupon.CreateTest do
   alias Owaygo.Support
 
   defp create() do
-    assert {:ok, %{user: user, location: location}} = Support.create_location_with_owner()
+    assert {:ok, %{user: _user, location: location}} = Support.create_location_with_owner()
     Support.coupon_param_map() |> Map.put(:location_id, location.id)
   end
 
