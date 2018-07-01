@@ -5,13 +5,23 @@ defmodule Owaygo.Coupon.CreateTest do
   alias Owaygo.Coupon.Create
 
   defp create() do
-    assert {:ok, %{user: user, location: location}} = Support.create_location_with_owner()
+    assert {:ok, %{user: _user, location: location}} = Support.create_location_with_owner()
     Support.coupon_param_map() |> Map.put(:location_id, location.id)
   end
 
   defp check_if_exists(create, coupon, key) do
-    if create |> Map.has_key(key) do
-      assert create |> Map.get(key) == coupon |> Map.get(key)
+    if create |> Map.has_key?(key) do
+      case key do
+        :start_date -> assert create |> Map.get(key) |> to_string == coupon |> Map.get(key) |> to_string
+        :end_date -> assert create |> Map.get(key) |> to_string == coupon |> Map.get(key) |> to_string
+        :gender -> assert create |> Map.get(key) |> String.downcase == coupon |> Map.get(key)
+        :visited -> case create |> Map.get(key) do
+          "false" -> assert false == coupon.visited
+          "true" -> assert true == coupon.visited
+          bool -> assert bool == coupon.visited
+        end
+        _ -> assert create |> Map.get(key) == coupon |> Map.get(key)
+      end
     else
       assert coupon |> Map.get(key) == nil
     end
@@ -136,9 +146,8 @@ defmodule Owaygo.Coupon.CreateTest do
       create = create()
       Support.accept_special_chars("jasfja","jasfka", ["@", "~", "#", "$", "%",
       "^", "&", "*", "(", ")", "$", "+", "=", "|", "<", ">", ":", ";",
-      "\""]) |> Enum.each(fn(value) ->
-        check_error(create |> Map.put(:description, value),
-        %{description: ["has invalid format"]})
+      "\"", "'"]) |> Enum.each(fn(value) ->
+        check_success(create |> Map.put(:description, value))
       end)
     end
 
@@ -146,7 +155,7 @@ defmodule Owaygo.Coupon.CreateTest do
       create = create()
       Support.rejected_special_chars("jasfja","jasfka", ["@", "~", "#", "$", "%",
       "^", "&", "*", "(", ")", "$", "+", "=", "|", "<", ">", ":", ";",
-      "\""]) |> Enum.each(fn(value) ->
+      "\"", "'"]) |> Enum.each(fn(value) ->
         check_error(create |> Map.put(:description, value),
         %{description: ["has invalid format"]})
       end)
@@ -180,7 +189,7 @@ defmodule Owaygo.Coupon.CreateTest do
     test "reject when start_date is after end date if there is one" do
       check_error(create() |> Map.put(:start_date, Date.add(Date.utc_today, 10))
       |> Map.put(:end_date, Date.utc_today),
-      %{start_date: ["must come before end date"]})å
+      %{start_date: ["must come before end date"]})
     end
   end
 
@@ -196,7 +205,7 @@ defmodule Owaygo.Coupon.CreateTest do
     end
 
     test "accept when end_date is a date_string" do
-      check_success(create() |> Map.put(:end_date, "2017-06-28"))
+      check_success(create() |> Map.put(:end_date, Date.utc_today() |> to_string))
     end
 
     test "accept when end_date is a date" do
@@ -204,8 +213,8 @@ defmodule Owaygo.Coupon.CreateTest do
     end
 
     test "reject when end_date is less than current date" do
-      check_error(create() |> Map.put(:end_date, Date.add(Date.utc_today, -1)),
-      %{end_date: ["must be after current date"]})
+      check_error(create() |> Map.put(:end_date, Date.add(Date.utc_today, -1)) |> Map.delete(:start_date),
+      %{end_date: ["can't be before current date"]})
     end
   end
 
@@ -293,16 +302,16 @@ defmodule Owaygo.Coupon.CreateTest do
 
     test "reject when min age is less than 13" do
       check_error(create() |> Map.put(:min_age, 12),
-      %{min_age: ["must be at least 13"]})
+      %{min_age: ["must be greater than or equal to 13"]})
     end
 
     test "reject when min_age is greater than max_age if there is one" do
       check_error(create() |> Map.put(:min_age, 25) |> Map.put(:max_age, 24),
-      %{min_age: ["must be less than max_age"]})
+      %{min_age: ["must be less than max age"]})
     end
 
     test "reject when min_age is greater than 130" do
-      check_error(create() |> Map.put(:min_age, 131),
+      check_error(create() |> Map.put(:min_age, 131) |> Map.delete(:max_age),
       %{min_age: ["must be less than or equal to 130"]})
     end
 
@@ -311,18 +320,18 @@ defmodule Owaygo.Coupon.CreateTest do
     end
 
     test "accept when min_age is 130" do
-      check_success(create() |> Map.put(:min_age, 130))
+      check_success(create() |> Map.put(:min_age, 130) |> Map.delete(:max_age))
     end
   end
 
   describe "validity of max_age" do
     test "reject when max_age is more than 130" do
-      check_error(create() |> Map.put(:max_age, 130),
+      check_error(create() |> Map.put(:max_age, 131),
       %{max_age: ["must be less than or equal to 130"]})
     end
 
     test "reject max_age when it is less than 13" do
-      check_error(create() |> Map.put(:max_age, 12),
+      check_error(create() |> Map.put(:max_age, 12) |> Map.delete(:min_age),
       %{max_age: ["must be greater than or equal to 13"]})
     end
 
