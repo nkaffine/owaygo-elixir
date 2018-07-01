@@ -10,7 +10,6 @@ defmodule OwaygoWeb.CouponController do
     start_date: params["start_date"],
     end_date: params["end_date"],
     offered: params["offered"],
-    redemptions: params["redemptions"],
     gender: params["gender"],
     visited: params["visited"],
     min_age: params["min_age"],
