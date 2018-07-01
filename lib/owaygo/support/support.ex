@@ -509,7 +509,7 @@ defmodule Owaygo.Support do
     %{description: @coupon_description, start_date: @start_date,
     end_date: @end_date, offered: @offered, gender: @gender, visited: @visited,
     min_age: @min_age, max_age: @max_age, percentage_value: @percentage_value,
-    dollar_value: @dollar_values}
+    dollar_value: @dollar_value}
   end
 
 end
